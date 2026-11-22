@@ -8,6 +8,7 @@ var out := "screenshots"
 var shots: Array = []
 var t := 0.0
 var shot_name := ""
+var scale := 3  # scale=4를 주면 1920x1080(스토어 규격)
 
 
 func _initialize() -> void:
@@ -15,6 +16,10 @@ func _initialize() -> void:
 	if args.size() > 0:
 		out = args[0]
 	shots = args.slice(1) if args.size() > 1 else ["combat:1", "boss:3", "shop", "upgrade"]
+	for a in shots.duplicate():
+		if a.begins_with("scale="):
+			scale = int(a.get_slice("=", 1))
+			shots.erase(a)
 	DirAccess.make_dir_recursive_absolute(out)
 
 
@@ -55,8 +60,9 @@ func _next() -> void:
 			main._enter(c, Vector2i.LEFT)
 			break
 	main.player.max_hp = 8
-	main.gold = 57
-	for id in ["twin", "sharp", "homing"]:
+	main.gold = 57 + int(parts[1]) * 11 if parts.size() > 1 else 57
+	var builds := [["twin", "sharp", "homing"], ["triple", "explosive", "pierce", "frost"], ["souls", "inferno", "trigger", "boots"]]
+	for id in builds[(int(parts[1]) if parts.size() > 1 else 0) % 3]:
 		main._take_upgrade(id)
 	if parts[0] == "pause":
 		main.open_pause.call_deferred()
@@ -104,6 +110,6 @@ func _process(delta: float) -> bool:
 
 func _save(file: String) -> void:
 	var img := root.get_texture().get_image()
-	img.resize(img.get_width() * 3, img.get_height() * 3, Image.INTERPOLATE_NEAREST)
+	img.resize(img.get_width() * scale, img.get_height() * scale, Image.INTERPOLATE_NEAREST)
 	img.save_png(out.path_join(file + ".png"))
 	print("saved ", out.path_join(file + ".png"))

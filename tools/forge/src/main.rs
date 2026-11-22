@@ -7,10 +7,12 @@
 //! - `forge test [--long]` : 헤드리스 자가검증 전체(GODOT 환경 변수로 godot 경로 지정).
 //! - `forge build` : Windows·macOS·Linux 내보내기(build/).
 //! - `forge steam-vdf` / `forge steam-upload` : SteamPipe VDF 생성 / steamcmd 업로드.
+//! - `forge capsules` : Steam 스토어 캡슐 이미지(store/capsules/)를 키 아트+로고로 만든다.
 
 mod audio;
 mod pixel;
 mod release;
+mod store;
 
 use std::path::{Path, PathBuf};
 use std::process::{exit, Command};
@@ -110,9 +112,10 @@ fn main() {
             release::steam_vdf(&root);
         }
         Some("steam-upload") => release::steam_upload(&root),
+        Some("capsules") => store::run(&root),
         Some("sheet") => pixel::sheet(&root, &manifest(&root), Path::new(args.get(1).map(String::as_str).unwrap_or("sheet.png"))),
         _ => {
-            eprintln!("사용법: forge <gen [이름] | pixel | sheet <out.png> | sfx | steam-addon | test [--long] | build | steam-vdf | steam-upload>");
+            eprintln!("사용법: forge <gen [이름] | pixel | sheet <out.png> | sfx | steam-addon | test [--long] | build | steam-vdf | steam-upload | capsules>");
             exit(2);
         }
     }
