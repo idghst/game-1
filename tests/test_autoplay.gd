@@ -3,7 +3,7 @@ extends SceneTree
 ## 봇으로 여러 판을 끝까지 돌려 크래시·멈춤이 없는지, 층별 소요 시간·도달 층·승률을 출력한다.
 ## god을 주면 플레이어가 죽지 않아 한 판 전체 길이(15~25분 목표)를 잰다.
 
-const Bot = preload("res://tools/bot.gd")
+const Bot = preload("res://scripts/bot.gd")
 
 var runs := 3
 var god := false

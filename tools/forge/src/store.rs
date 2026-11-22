@@ -65,7 +65,26 @@ fn draw_logo(img: &mut RgbaImage, px: &[(i32, i32, Rgba<u8>)], lw: i32, lh: i32,
     }
 }
 
+/// Windows 실행 파일 아이콘(assets/logo/icon.ico, 16~256px): 등불 픽셀 아이콘을 크기마다 정수 배율로.
+pub fn windows_icon(root: &Path) {
+    let svg = std::fs::read_to_string(root.join("assets/logo/icon.svg")).expect("icon.svg");
+    let (px, w, h) = logo_pixels(&svg);
+    let frames: Vec<image::codecs::ico::IcoFrame> = [16u32, 24, 32, 48, 64, 128, 256]
+        .iter()
+        .map(|&size| {
+            let mut img = RgbaImage::from_pixel(size, size, Rgba([0x17, 0x14, 0x1d, 255]));
+            let s = ((size as i32 - 2) / h.max(w)).max(1) as u32;
+            draw_logo(&mut img, &px, w, h, s, size as i32 / 2);
+            image::codecs::ico::IcoFrame::as_png(img.as_raw(), size, size, image::ExtendedColorType::Rgba8).expect("ico 프레임")
+        })
+        .collect();
+    let f = std::fs::File::create(root.join("assets/logo/icon.ico")).expect("icon.ico");
+    image::codecs::ico::IcoEncoder::new(f).encode_images(&frames).expect("ico 저장");
+    println!("assets/logo/icon.ico");
+}
+
 pub fn run(root: &Path) {
+    windows_icon(root);
     let art = image::open(root.join("assets/sprites/title.png")).expect("assets/sprites/title.png (forge pixel 먼저)").to_rgba8();
     let icon_svg = std::fs::read_to_string(root.join("assets/logo/icon.svg")).expect("icon.svg");
     let logo_svg = std::fs::read_to_string(root.join("assets/logo/logo.svg")).expect("logo.svg");

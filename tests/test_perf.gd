@@ -3,7 +3,7 @@ extends SceneTree
 ## 봇이 무적으로 9층 보스방과 8층 전투방에서 싸우는 동안 프레임 시간을 재서,
 ## 평균 60fps 이상이고 16.7ms(60fps)를 크게 넘는 프레임이 거의 없는지 확인한다.
 
-const Bot = preload("res://tools/bot.gd")
+const Bot = preload("res://scripts/bot.gd")
 const SCENES := [["boss", 9], ["combat", 8], ["boss", 6]]
 const SECONDS := 15.0
 

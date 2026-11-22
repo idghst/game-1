@@ -85,14 +85,14 @@ windows.x86_64 = { "res://addons/godotsteam/win64/steam_api64.dll": "" }
 }
 
 /// 헤드리스 자가검증 전체를 돌린다. 하나라도 실패하면 종료 코드 1.
-pub fn test(root: &Path, long: bool) {
+pub fn test(root: &Path, long: bool, quick: bool) {
     let g = godot();
     let path = root.to_string_lossy().to_string();
     if !run(Command::new(&g).args(["--headless", "--path", &path, "--import"])) {
         // 첫 import는 번역 파일이 아직 없다는 경고로 실패 코드를 낼 수 있어 한 번 더 돌린다
         run(Command::new(&g).args(["--headless", "--path", &path, "--import"]));
     }
-    let n = if long { "20" } else { "3" };
+    let n = if long { "20" } else if quick { "1" } else { "3" };
     let tests: Vec<Vec<&str>> = vec![
         vec!["tests/test_dungeon.gd"],
         vec!["tests/test_i18n.gd"],
@@ -102,6 +102,8 @@ pub fn test(root: &Path, long: bool) {
         vec!["tests/test_autoplay.gd", "--", n],
         vec!["tests/test_balance.gd", "--", n],
     ];
+    // --quick: 다른 OS 러너용(밸런스 측정은 Linux CI 한 곳에서만)
+    let tests: Vec<Vec<&str>> = tests.into_iter().filter(|t| !(quick && t[0].ends_with("test_balance.gd"))).collect();
     let mut failed = vec![];
     for t in &tests {
         if !root.join(t[0]).exists() {
@@ -127,10 +129,10 @@ pub fn test(root: &Path, long: bool) {
 }
 
 /// 3플랫폼 내보내기. macOS .zip은 SteamPipe용으로 build/macos/content에 풀어 둔다.
-pub fn build(root: &Path) {
+pub fn build(root: &Path, only: Option<&str>) {
     let g = godot();
     let path = root.to_string_lossy().to_string();
-    for (preset, dir) in PRESETS {
+    for (preset, dir) in PRESETS.into_iter().filter(|(_, d)| only.is_none_or(|o| o.split(',').any(|x| x == *d))) {
         let out_dir = root.join("build").join(dir);
         let _ = std::fs::remove_dir_all(&out_dir);
         std::fs::create_dir_all(&out_dir).unwrap();

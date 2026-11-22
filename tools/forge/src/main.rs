@@ -4,8 +4,8 @@
 //! - `forge sheet <out.png>` : 확인용으로 모든 스프라이트를 확대해 한 장에 모은다.
 //! - `forge sfx`   : 효과음·배경음을 합성해 assets/audio/*.wav로 쓴다.
 //! - `forge steam-addon` : GodotSteam GDExtension을 받아 addons/godotsteam에 푼다(체크섬 확인).
-//! - `forge test [--long]` : 헤드리스 자가검증 전체(GODOT 환경 변수로 godot 경로 지정).
-//! - `forge build` : Windows·macOS·Linux 내보내기(build/).
+//! - `forge test [--long|--quick]` : 헤드리스 자가검증(GODOT 환경 변수로 godot 경로 지정). --quick은 밸런스를 빼고 자동 플레이 1판.
+//! - `forge build [windows,macos,linux]` : 내보내기(build/). 생략하면 세 플랫폼 모두.
 //! - `forge steam-vdf` / `forge steam-upload` : SteamPipe VDF 생성 / steamcmd 업로드.
 //! - `forge capsules` : Steam 스토어 캡슐 이미지(store/capsules/)를 키 아트+로고로 만든다.
 //! - `forge graph` : GDScript를 직접 읽어 graphify 그래프에 합치고 Obsidian·HTML로 내보낸다.
@@ -108,8 +108,8 @@ fn main() {
         Some("pixel") => pixel::run(&root, &manifest(&root)),
         Some("sfx") => audio::run(&root),
         Some("steam-addon") => release::steam_addon(&root),
-        Some("test") => release::test(&root, args.iter().any(|a| a == "--long")),
-        Some("build") => release::build(&root),
+        Some("test") => release::test(&root, args.iter().any(|a| a == "--long"), args.iter().any(|a| a == "--quick")),
+        Some("build") => release::build(&root, args.get(1).map(String::as_str)),
         Some("steam-vdf") => {
             release::steam_vdf(&root);
         }
@@ -118,7 +118,7 @@ fn main() {
         Some("graph") => gdgraph::run(&root),
         Some("sheet") => pixel::sheet(&root, &manifest(&root), Path::new(args.get(1).map(String::as_str).unwrap_or("sheet.png"))),
         _ => {
-            eprintln!("사용법: forge <gen [이름] | pixel | sheet <out.png> | sfx | steam-addon | test [--long] | build | steam-vdf | steam-upload | capsules | graph>");
+            eprintln!("사용법: forge <gen [이름] | pixel | sheet <out.png> | sfx | steam-addon | test [--long|--quick] | build [플랫폼,...] | steam-vdf | steam-upload | capsules | graph>");
             exit(2);
         }
     }

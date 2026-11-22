@@ -4,7 +4,7 @@ extends SceneTree
 ## 검사: 실력이 높을수록 더 깊이 가야 하고(난이도 곡선이 실력을 구분), 미숙한 봇이 쉽게 이기면 안 된다.
 ## meta를 주면 잿불 제단 강화를 모두 최대로 두고 잰다(테스트용 프로필 경로를 써서 실제 저장은 건드리지 않음).
 
-const Bot = preload("res://tools/bot.gd")
+const Bot = preload("res://scripts/bot.gd")
 const SKILLS := [1.0, 0.55, 0.25]
 
 var runs := 6

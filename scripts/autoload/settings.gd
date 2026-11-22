@@ -26,8 +26,12 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	for a in REBINDABLE:
 		_defaults[a] = {"kb": _slot_event(a, "kb"), "pad": _slot_event(a, "pad")}
-	if not FileAccess.file_exists(path) and SteamService.on_deck:
-		fullscreen = true  # Steam Deck 첫 실행은 전체 화면
+	if not FileAccess.file_exists(path):
+		fullscreen = SteamService.on_deck  # Steam Deck 첫 실행은 전체 화면
+		# 첫 실행: 화면(제목 표시줄 여유 포함)에 들어가는 가장 큰 정수 배율. 1366x768 노트북이면 2배
+		if DisplayServer.get_name() != "headless":
+			var usable := DisplayServer.screen_get_usable_rect().size
+			scale = clampi(floori(minf(usable.x / 480.0, (usable.y - 40) / 270.0)), 1, 3)
 	load_settings()
 	apply()
 	_theme = UiTheme.build()
