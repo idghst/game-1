@@ -11,7 +11,7 @@
 | 구분 | 플랫폼 | 검증 |
 |---|---|---|
 | 메인 | Windows 10/11 x64 | CI `windows-latest`에서 배포 exe 실행: 헤드리스 자동 플레이 한 판, 실제 창(ANGLE/Direct3D) 렌더·정수 배율·전체 화면, 저장, GodotSteam DLL, 메타데이터·아이콘·GUI 서브시스템, `forge test --quick` |
-| 메인 | macOS 11+ (Apple Silicon·Intel 유니버설) | CI `macos-latest`(Apple Silicon)에서 배포 앱 실행: 같은 스모크, 유니버설 바이너리·ad-hoc 서명 확인 |
+| 메인 | macOS 11+ (Apple Silicon·Intel 유니버설) | CI `macos-latest`(Apple Silicon)에서 배포 앱 실행: 같은 스모크, 유니버설 바이너리·ad-hoc 서명 확인. 태그 릴리스는 시크릿이 있으면 Developer ID 서명·공증 후 서명본으로 다시 스모크 |
 | 부가 | Linux x64 / SteamOS(Steam Deck) | 빌드와 헤드리스 스모크는 돌지만 실패해도 CI를 막지 않음 |
 
 배포 빌드 스모크는 누구나 돌릴 수 있습니다: `HollowVigil.exe --headless --fixed-fps 60 -- --smoke`, 실제 창은 `-- --smoke-render`(결과: 사용자 데이터 폴더의 `smoke_result.txt`).
@@ -29,6 +29,39 @@
 `project.godot`의 `config/version`을 올리고 머지한 뒤, 같은 버전의 태그(`v0.9.0` 형식)를 푸시하면 `.github/workflows/release.yml`이
 테스트·실기 검증을 다시 돌리고 설치 파일·zip·체크섬을 GitHub Release로 올립니다. 설치 파일만 로컬에서 만들려면 Windows에서
 `forge build windows` 후 `ISCC /DAppVersion=<버전> installer\HollowVigil.iss`(Inno Setup 6).
+
+### macOS 서명·공증(관리자)
+태그 릴리스는 아래 시크릿 6개가 **모두** 있으면 macOS 앱을 Developer ID로 서명(hardened runtime·타임스탬프)하고 Apple 공증 → 스테이플까지 마친 zip을 올립니다.
+**하나도 없으면** 지금처럼 ad-hoc 서명 zip을 올리고 릴리스 노트와 로그에 "서명·공증 안 됨"을 남깁니다. **일부만 있으면** 설정 실수로 보고 릴리스를 멈춥니다.
+공증은 `v*` 태그 릴리스에서만 돌고 PR·main CI에는 영향이 없습니다.
+
+| 시크릿 | 값 |
+|---|---|
+| `MACOS_CERT_P12_BASE64` | Developer ID Application 인증서(.p12, 개인 키 포함)의 base64 |
+| `MACOS_CERT_PASSWORD` | .p12를 내보낼 때 정한 암호 |
+| `APPLE_TEAM_ID` | 팀 ID(10자, developer.apple.com → Membership) |
+| `APPLE_API_KEY_ID` | App Store Connect API 키 ID |
+| `APPLE_API_ISSUER_ID` | API 키의 Issuer ID(UUID) |
+| `APPLE_API_KEY_P8_BASE64` | 내려받은 `AuthKey_<키ID>.p8`의 base64 |
+
+준비 순서(Apple Developer Program 가입 필요, Account Holder 권한):
+1. Mac의 **키체인 접근 → 인증서 지원 → 인증 기관에서 인증서 요청**으로 CSR(.certSigningRequest)을 디스크에 저장합니다.
+2. [developer.apple.com → Certificates](https://developer.apple.com/account/resources/certificates/add)에서 **Developer ID Application**(G2 Sub-CA)을 골라 CSR을 올리고 .cer를 받아 더블클릭해 키체인에 넣습니다.
+3. 키체인 접근의 **내 인증서**에서 "Developer ID Application: … (팀ID)"를 오른쪽 클릭 → **내보내기**로 `.p12`를 저장하고 암호를 정합니다.
+4. [App Store Connect → 사용자 및 액세스 → 통합 → App Store Connect API](https://appstoreconnect.apple.com/access/integrations/api)에서 팀 키를 만들고(역할: Developer), 키 ID·Issuer ID를 적어 두고 `.p8`을 받습니다(한 번만 받을 수 있음).
+5. 시크릿을 넣습니다(값이 셸 기록에 남지 않게 파일·프롬프트로 넣습니다):
+
+```sh
+base64 -i DeveloperID.p12 | gh secret set MACOS_CERT_P12_BASE64
+gh secret set MACOS_CERT_PASSWORD          # 프롬프트에 .p12 암호 입력
+gh secret set APPLE_TEAM_ID                # 예: ABCDE12345
+gh secret set APPLE_API_KEY_ID             # 예: 2X9R4HXF34
+gh secret set APPLE_API_ISSUER_ID          # UUID
+base64 -i AuthKey_<키ID>.p8 | gh secret set APPLE_API_KEY_P8_BASE64
+```
+
+넣은 뒤 다음 태그 릴리스의 `macos-sign` 작업 로그에서 `source=Notarized Developer ID`를 확인하세요. 엔타이틀먼트(`installer/macos.entitlements`)는
+Steam 오버레이 주입에 필요한 `disable-library-validation`·`allow-dyld-environment-variables` 두 개만 넣었습니다.
 
 ## 실행
 

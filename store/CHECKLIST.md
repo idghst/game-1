@@ -23,7 +23,10 @@
 - [ ] 스토어 페이지 입력, 캡슐·스크린샷 업로드, 가격·출시일, 연령 등급 설문(IARC)
 - [ ] 트레일러 영상(선택이지만 강력 권장, 아직 없음)
 - [ ] (부가) Steam Deck 호환성 검토 요청 — Linux를 출시 범위에 넣을 때만
-- [ ] macOS 공증(notarization): Apple 개발자 계정으로 서명·공증하지 않으면 Gatekeeper 경고. 현재 ad-hoc 서명
+- [x] macOS Developer ID 서명·공증·스테이플 단계 — `release.yml`의 `macos-sign`(시크릿 없으면 건너뛰고 ad-hoc zip을 "서명·공증 안 됨"으로 표시)
+- [ ] **macOS 서명·공증 시크릿 넣기(주인이 할 일)**: Apple Developer Program 가입 → Developer ID Application 인증서(.p12)·App Store Connect API 키(.p8) 만들기 →
+  `MACOS_CERT_P12_BASE64`·`MACOS_CERT_PASSWORD`·`APPLE_TEAM_ID`·`APPLE_API_KEY_ID`·`APPLE_API_ISSUER_ID`·`APPLE_API_KEY_P8_BASE64`를 `gh secret set`으로 등록(순서·명령은 README "macOS 서명·공증").
+  넣기 전까지 macOS zip은 Gatekeeper 경고가 뜸. 넣은 뒤 첫 태그 릴리스 로그에서 `source=Notarized Developer ID` 확인
 - [x] Windows 설치 파일(Inno Setup, 사용자 단위 설치·시작 메뉴·제거 프로그램 등록, 한/영) — CI에서 무인 설치·실행·제거 검증, `v*` 태그로 GitHub Release
 - [ ] **Authenticode 서명(주인이 할 일)**: 설치 파일·exe에 서명이 없어 SmartScreen 경고가 뜸(README에 넘어가는 법 안내). 인증서를 사면 CI의 설치 파일 단계 뒤에 signtool 서명을 붙임. Steam으로만 배포하면 필수 아님
 - [ ] CI 필수 체크 지정: 비공개 저장소 + GitHub Free에서는 브랜치 보호를 쓸 수 없음. Pro로 올리거나 공개하면 `windows`·`macos` 작업을 필수 체크로 지정
