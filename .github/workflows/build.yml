@@ -7,6 +7,7 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  workflow_call:  # release.yml(v* 태그)이 같은 빌드·검증을 재사용한다
 
 concurrency:
   group: build-${{ github.event.pull_request.number || github.ref }}
@@ -154,13 +155,66 @@ jobs:
           $log = (Get-Content render_out.txt, render_err.txt, "$ud/smoke_result.txt", "$ud/logs/godot.log" -Raw -ErrorAction SilentlyContinue) -join "`n"
           if ($p.ExitCode -ne 0 -or $log -notmatch 'RESULT: PASS' -or $log -match 'SCRIPT ERROR') { throw "렌더 스모크 실패" }
 
+      - name: 설치 파일 만들기(Inno Setup)
+        run: |
+          $ver = (Select-String -Path project.godot -Pattern '^config/version="(.+)"').Matches[0].Groups[1].Value
+          "APP_VERSION=$ver" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup --version=6.4.3 -y --no-progress | Out-Null }
+          & $iscc /Qp "/DAppVersion=$ver" installer/HollowVigil.iss
+          if ($LASTEXITCODE -ne 0) { throw "ISCC 실패" }
+          Get-ChildItem build/installer | Format-Table Name, Length
+
+      - name: 설치 → 설치본 스모크 → 제거 확인
+        run: |
+          $setup = "build/installer/HollowVigil-Setup-$env:APP_VERSION.exe"
+          $p = Start-Process $setup -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',"/LOG=$PWD\install.log" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "무인 설치 실패: $($p.ExitCode)" }
+          # 관리자 권한 없는 사용자 단위 설치 위치
+          $app = "$env:LOCALAPPDATA\Programs\Hollow Vigil"
+          foreach ($f in 'HollowVigil.exe', 'steam_api64.dll', 'libgodotsteam.windows.template_release.x86_64.dll', 'unins000.exe') {
+            if (-not (Test-Path "$app\$f")) { throw "설치 폴더에 없음: $f" }
+          }
+          $lnk = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Hollow Vigil\Hollow Vigil.lnk"
+          if (-not (Test-Path $lnk)) { throw "시작 메뉴 바로가기 없음" }
+          if (Test-Path "$([Environment]::GetFolderPath('Desktop'))\Hollow Vigil.lnk") { throw "바탕화면 바로가기는 기본으로 꺼져 있어야 함" }
+          $key = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{0604C6E0-66C6-4C2E-B88A-0E3FF58A7B74}_is1'
+          $reg = Get-ItemProperty $key
+          $reg | Format-List DisplayName, DisplayVersion, Publisher, InstallLocation, DisplayIcon
+          if ($reg.DisplayVersion -ne $env:APP_VERSION) { throw "제거 프로그램 등록 버전이 다름: $($reg.DisplayVersion)" }
+
+          $ud = "$env:APPDATA\Godot\app_userdata\Hollow Vigil"
+          Remove-Item "$ud\smoke_result.txt" -ErrorAction SilentlyContinue
+          $p = Start-Process "$app\HollowVigil.exe" -ArgumentList '--headless','--fixed-fps','60','--','--smoke' `
+                 -Wait -PassThru -RedirectStandardOutput installed_out.txt -RedirectStandardError installed_err.txt
+          $log = (Get-Content installed_out.txt, installed_err.txt, "$ud\smoke_result.txt" -Raw -ErrorAction SilentlyContinue) -join "`n"
+          $log
+          # 설치 폴더의 exe가 실행됐는지도 본다(Godot는 경로를 / 로 출력)
+          if ($p.ExitCode -ne 0 -or $log -notmatch 'RESULT: PASS' -or $log -match 'SCRIPT ERROR' -or $log -notmatch [regex]::Escape($app.Replace('\', '/'))) { throw "설치본 스모크 실패" }
+
+          Set-Content "$ud\keep_me.txt" "save"  # 저장 파일 대신: 제거 후에도 남아야 한다
+          Start-Process "$app\unins000.exe" -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART' -Wait
+          # 제거 프로그램은 자신을 임시 폴더로 복사해 다시 실행하므로 폴더가 사라질 때까지 기다린다
+          for ($i = 0; $i -lt 60 -and (Test-Path $app); $i++) { Start-Sleep 1 }
+          if (Test-Path $app) { throw "제거 후에도 설치 폴더가 남음" }
+          if (Test-Path $lnk) { throw "제거 후 시작 메뉴 바로가기가 남음" }
+          if (Test-Path $key) { throw "제거 후 제거 프로그램 등록이 남음" }
+          if (-not (Test-Path "$ud\keep_me.txt")) { throw "제거가 저장 폴더를 지움" }
+          "설치·설치본 실행·제거 확인 완료"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HollowVigil-installer
+          path: build/installer/*.exe
+          retention-days: 7
+
       - name: 스모크 결과·스크린샷 모으기
         if: always()
         run: |
           New-Item -ItemType Directory -Force smoke | Out-Null
           $ud = "$env:APPDATA/Godot/app_userdata/Hollow Vigil"
           Copy-Item "$ud/*.png", "$ud/smoke_result.txt", "$ud/logs/*.log" smoke -ErrorAction SilentlyContinue
-          Copy-Item exe_icon.png, *_out.txt, *_err.txt smoke -ErrorAction SilentlyContinue
+          Copy-Item exe_icon.png, *_out.txt, *_err.txt, install.log smoke -ErrorAction SilentlyContinue
           Get-ChildItem smoke
       - uses: actions/upload-artifact@v4
         if: always()
