@@ -158,8 +158,9 @@ func _render() -> void:
 				t = 0.0
 				step = 3
 		3:
-			if t > 1.0:
+			if t > 1.5:
 				_integer_scale("windowed 2x")
+				check(DisplayServer.window_get_size() == Vector2i(960, 540), "window restored to exactly 960x540 after leaving fullscreen")
 				_finish()
 
 
