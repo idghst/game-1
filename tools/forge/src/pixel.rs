@@ -2,7 +2,7 @@
 //! 배경 키 제거 → 내용 영역 자르기 → 면적 평균 축소 → 공용 팔레트로 양자화 → 1px 외곽선.
 
 use crate::Entry;
-use image::{Rgba, RgbaImage};
+use image::{imageops, Rgba, RgbaImage};
 use std::path::Path;
 
 /// 공용 다크 판타지 팔레트(모든 에셋이 이 색만 쓴다).
@@ -149,9 +149,66 @@ fn outline(img: &RgbaImage) -> RgbaImage {
     out
 }
 
+/// Steam 업적 아이콘: 어두운 메달 바탕 + 청동 테두리 위에 외곽선 친 그림을 가운데 얹는다.
+fn badge(img: &RgbaImage, size: u32) -> RgbaImage {
+    let c = |v: u32| Rgba([(v >> 16) as u8, (v >> 8) as u8, v as u8, 255]);
+    let mut out = RgbaImage::from_pixel(size, size, c(0x17141d));
+    let mid = (size as f32 - 1.0) / 2.0;
+    for (x, y, p) in out.enumerate_pixels_mut() {
+        let edge = x.min(y).min(size - 1 - x).min(size - 1 - y);
+        let r = ((x as f32 - mid).powi(2) + (y as f32 - mid).powi(2)).sqrt();
+        *p = match edge {
+            0 => c(0x0b0a0f),
+            1 => c(0xba8a5e),
+            2 => c(0x4a2c1e),
+            _ if r < size as f32 * 0.42 => c(0x231e2b),
+            _ => *p,
+        };
+    }
+    let art = outline(&shrink(img, bbox(img), size - 14, size - 14, false, 18.0));
+    let (ox, oy) = ((size - art.width()) / 2, (size - art.height()) / 2);
+    imageops::overlay(&mut out, &art, ox as i64, oy as i64);
+    out
+}
+
+/// 미달성 아이콘: 밝기만 남겨 어둡게 누른 뒤 팔레트의 회색 단계로 맞춘다(달성본에서 결정적으로 만든다).
+fn locked(img: &RgbaImage) -> RgbaImage {
+    let greys: Vec<[u8; 3]> = PALETTE[..10].iter().map(|&p| rgb(p)).collect();
+    let lum = |c: [u8; 3]| 0.299 * c[0] as f32 + 0.587 * c[1] as f32 + 0.114 * c[2] as f32;
+    let mut out = img.clone();
+    for p in out.pixels_mut() {
+        let l = lum([p[0], p[1], p[2]]) * 0.45 + 14.0;
+        let g = *greys.iter().min_by(|a, b| (lum(**a) - l).abs().total_cmp(&(lum(**b) - l).abs())).unwrap();
+        *p = Rgba([g[0], g[1], g[2], p[3]]);
+    }
+    out
+}
+
+/// store/achievements/: <id>.png·<id>_locked.png(64x64), 256/ 아래 4배 확대본, 14열×2행 확인용 sheet.png.
+fn achievements(root: &Path, done: &[(String, RgbaImage)]) {
+    let dir = root.join("store/achievements");
+    std::fs::create_dir_all(dir.join("256")).expect("store/achievements/256 만들기");
+    let big = |img: &RgbaImage, k: u32| imageops::resize(img, img.width() * k, img.height() * k, imageops::FilterType::Nearest);
+    let (k, gap) = (2u32, 8u32);
+    let cell = done[0].1.width() * k + gap;
+    let mut sheet = RgbaImage::from_pixel(cell * done.len() as u32 + gap, cell * 2 + gap, Rgba([40, 36, 48, 255]));
+    for (i, (id, on)) in done.iter().enumerate() {
+        let off = locked(on);
+        for (img, name) in [(on, id.clone()), (&off, format!("{id}_locked"))] {
+            img.save(dir.join(format!("{name}.png"))).expect("PNG 저장");
+            big(img, 4).save(dir.join(format!("256/{name}.png"))).expect("PNG 저장");
+        }
+        imageops::overlay(&mut sheet, &big(on, k), (gap + i as u32 * cell) as i64, gap as i64);
+        imageops::overlay(&mut sheet, &big(&off, k), (gap + i as u32 * cell) as i64, (gap + cell) as i64);
+    }
+    sheet.save(dir.join("sheet.png")).expect("시트 저장");
+    println!("업적 아이콘 {}개 -> store/achievements", done.len());
+}
+
 pub fn run(root: &Path, entries: &[Entry]) {
     let dir = root.join("assets/sprites");
     std::fs::create_dir_all(&dir).expect("assets/sprites 만들기");
+    let mut badges = vec![];
     for e in entries {
         let src = root.join(format!("assets/src/{}.png", e.name));
         let Ok(img) = image::open(&src) else {
@@ -160,6 +217,11 @@ pub fn run(root: &Path, entries: &[Entry]) {
         };
         let mut img = img.to_rgba8();
         let out = match e.kind.as_str() {
+            "badge" => {
+                key_out(&mut img);
+                badges.push((e.name.trim_start_matches("ach_").to_string(), badge(&img, e.w)));
+                continue;
+            }
             "sprite" => {
                 key_out(&mut img);
                 outline(&shrink(&img, bbox(&img), e.w - 2, e.h - 2, false, 18.0))
@@ -171,10 +233,14 @@ pub fn run(root: &Path, entries: &[Entry]) {
         out.save(dir.join(format!("{}.png", e.name))).expect("PNG 저장");
         println!("{} -> {}x{}", e.name, out.width(), out.height());
     }
+    if !badges.is_empty() {
+        achievements(root, &badges);
+    }
 }
 
 /// 확인용 미리보기: 모든 스프라이트를 8배 확대(nearest)해 한 장에 늘어놓는다.
 pub fn sheet(root: &Path, entries: &[Entry], out: &Path) {
+    let entries: Vec<&Entry> = entries.iter().filter(|e| e.kind != "badge").collect(); // 업적 아이콘은 store/achievements/sheet.png
     let (cell, cols) = (4 * 48u32, 6u32);
     let rows = (entries.len() as u32).div_ceil(cols);
     let mut canvas = RgbaImage::from_pixel(cell * cols, cell * rows, Rgba([40, 36, 48, 255]));

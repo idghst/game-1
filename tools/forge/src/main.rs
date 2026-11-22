@@ -66,6 +66,10 @@ fn prompt_for(e: &Entry) -> (String, u32, u32) {
             let bg = if e.key == "green" { "pure green #00FF00" } else { "pure magenta #FF00FF" };
             (format!("16-bit pixel art game sprite of {}, top-down three-quarter view, centered, full body, dark fantasy, limited palette, crisp pixels, isolated on a flat solid {bg} background, no shadow, no ground, no text, no border", e.prompt), 512, 512)
         }
+        "badge" => {
+            let bg = if e.key == "green" { "pure green #00FF00" } else { "pure magenta #FF00FF" };
+            (format!("16-bit pixel art game achievement icon of {}, single bold object, centered, large and readable silhouette, dark fantasy, limited palette, crisp pixels, isolated on a flat solid {bg} background, no shadow, no text, no border, no frame", e.prompt), 512, 512)
+        }
         "tile" => (format!("{}, 16-bit pixel art game texture, dark fantasy, fills the whole frame, no border, no text", e.prompt), 512, 512),
         _ => (format!("{}, 16-bit pixel art, no text, no border", e.prompt), 1024, 576),
     }
