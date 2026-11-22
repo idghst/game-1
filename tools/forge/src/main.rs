@@ -8,8 +8,10 @@
 //! - `forge build` : Windows·macOS·Linux 내보내기(build/).
 //! - `forge steam-vdf` / `forge steam-upload` : SteamPipe VDF 생성 / steamcmd 업로드.
 //! - `forge capsules` : Steam 스토어 캡슐 이미지(store/capsules/)를 키 아트+로고로 만든다.
+//! - `forge graph` : GDScript를 직접 읽어 graphify 그래프에 합치고 Obsidian·HTML로 내보낸다.
 
 mod audio;
+mod gdgraph;
 mod pixel;
 mod release;
 mod store;
@@ -113,9 +115,10 @@ fn main() {
         }
         Some("steam-upload") => release::steam_upload(&root),
         Some("capsules") => store::run(&root),
+        Some("graph") => gdgraph::run(&root),
         Some("sheet") => pixel::sheet(&root, &manifest(&root), Path::new(args.get(1).map(String::as_str).unwrap_or("sheet.png"))),
         _ => {
-            eprintln!("사용법: forge <gen [이름] | pixel | sheet <out.png> | sfx | steam-addon | test [--long] | build | steam-vdf | steam-upload | capsules>");
+            eprintln!("사용법: forge <gen [이름] | pixel | sheet <out.png> | sfx | steam-addon | test [--long] | build | steam-vdf | steam-upload | capsules | graph>");
             exit(2);
         }
     }

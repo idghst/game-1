@@ -30,6 +30,7 @@ godot --path .                               # 게임 실행
 | `forge gen` → `forge pixel` | 맥미니 이미지 생성기로 원본 생성 → 공용 팔레트 픽셀아트 변환 |
 | `forge sfx` | 효과음·배경음 합성 |
 | `forge capsules` | 스토어 캡슐 이미지 |
+| `forge graph` | GDScript(.gd·.tscn·project.godot)를 직접 읽어 graphify 그래프에 합치고 Obsidian·HTML로 내보내기(주석은 읽지 않음) |
 
 창이 필요한 확인: `godot --path . -s tests/test_perf.gd`(프레임 속도), `godot --path . -s tools/screenshot.gd -- <폴더> [장면...]`(스크린샷).
 

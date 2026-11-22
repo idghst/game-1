@@ -16,8 +16,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Rust 도구 빌드
-        run: cargo build --release --manifest-path tools/forge/Cargo.toml
+      - name: Rust 도구 빌드·테스트
+        run: |
+          cargo build --release --manifest-path tools/forge/Cargo.toml
+          cargo test --release --manifest-path tools/forge/Cargo.toml
 
       - name: Godot·내보내기 템플릿 캐시
         id: godot-cache
