@@ -161,7 +161,6 @@ jobs:
           "APP_VERSION=$ver" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           if (-not (Test-Path $iscc)) { choco install innosetup --version=6.4.3 -y --no-progress | Out-Null }
-          (& $iscc /? 2>&1 | Select-String '\d+\.\d+\.\d+' | Select-Object -First 1).Line  # 사용한 버전을 로그에 남긴다
           & $iscc /Qp "/DAppVersion=$ver" installer/HollowVigil.iss
           if ($LASTEXITCODE -ne 0) { throw "ISCC 실패" }
           Get-ChildItem build/installer | Format-Table Name, Length
