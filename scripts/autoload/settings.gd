@@ -28,10 +28,10 @@ func _ready() -> void:
 		_defaults[a] = {"kb": _slot_event(a, "kb"), "pad": _slot_event(a, "pad")}
 	if not FileAccess.file_exists(path):
 		fullscreen = SteamService.on_deck  # Steam Deck 첫 실행은 전체 화면
-		# 첫 실행: 화면(제목 표시줄 여유 포함)에 들어가는 가장 큰 정수 배율. 1366x768 노트북이면 2배
+		# 첫 실행: 화면(제목 표시줄 여유 포함)에 들어가는 가장 큰 정수 배율(설정 범위 1~4). 1366x768이면 2배, 1080p면 3배
 		if DisplayServer.get_name() != "headless":
 			var usable := DisplayServer.screen_get_usable_rect().size
-			scale = clampi(floori(minf(usable.x / 480.0, (usable.y - 40) / 270.0)), 1, 3)
+			scale = clampi(floori(minf(usable.x / 480.0, (usable.y - 40) / 270.0)), 1, 4)
 	load_settings()
 	apply()
 	_theme = UiTheme.build()

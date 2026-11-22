@@ -22,6 +22,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Rust 빌드 캐시
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            tools/forge/target
+          key: cargo-${{ runner.os }}-${{ hashFiles('tools/forge/Cargo.lock') }}-${{ hashFiles('tools/forge/src/**') }}
+          restore-keys: cargo-${{ runner.os }}-${{ hashFiles('tools/forge/Cargo.lock') }}-
+
       - name: Rust 도구 빌드·테스트
         run: |
           cargo build --release --manifest-path tools/forge/Cargo.toml
@@ -174,6 +183,14 @@ jobs:
           Invoke-WebRequest "https://github.com/godotengine/godot-builds/releases/download/$env:GODOT_VERSION-stable/Godot_v$env:GODOT_VERSION-stable_win64.exe.zip" -OutFile ~/godot/g.zip
           Expand-Archive ~/godot/g.zip -DestinationPath ~/godot
           Remove-Item ~/godot/g.zip
+      - name: Rust 빌드 캐시
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            tools/forge/target
+          key: cargo-${{ runner.os }}-${{ hashFiles('tools/forge/Cargo.lock') }}-${{ hashFiles('tools/forge/src/**') }}
+          restore-keys: cargo-${{ runner.os }}-${{ hashFiles('tools/forge/Cargo.lock') }}-
       - name: forge test --quick (Windows)
         run: |
           cargo build --release --manifest-path tools/forge/Cargo.toml
