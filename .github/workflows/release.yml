@@ -8,6 +8,7 @@ name: release
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:  # 임시: 시크릿 없는 릴리스 경로 시험용(머지 전 되돌림)
 
 permissions:
   contents: write
@@ -156,7 +157,7 @@ jobs:
       - name: 태그와 project.godot 버전 확인
         run: |
           VER=$(sed -n 's/^config\/version="\(.*\)"/\1/p' project.godot)
-          if [ "v$VER" != "$GITHUB_REF_NAME" ]; then echo "태그 $GITHUB_REF_NAME 와 project.godot 버전 $VER 이 다릅니다"; exit 1; fi
+          if [ "$GITHUB_EVENT_NAME" = push ] && [ "v$VER" != "$GITHUB_REF_NAME" ]; then echo "태그 $GITHUB_REF_NAME 와 project.godot 버전 $VER 이 다릅니다"; exit 1; fi
           echo "VER=$VER" >> "$GITHUB_ENV"
 
       - uses: actions/download-artifact@v4
@@ -184,7 +185,14 @@ jobs:
           sed -e "s/{{VERSION}}/$VER/g" -e "/{{$DROP}}/d" -e "s/{{$KEEP}}//" .github/release-notes.md > notes.md
           cat notes.md
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-dry-run
+          path: |
+            dist
+            notes.md
       - name: GitHub Release 만들기
+        if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create "$GITHUB_REF_NAME" dist/* --title "Hollow Vigil $VER" --notes-file notes.md
