@@ -50,6 +50,7 @@ var _mouse_aim := true
 func _ready() -> void:
 	collision_layer = 2
 	collision_mask = 1
+	Art.unshaded(self)
 	var shape := CollisionShape2D.new()
 	shape.shape = CircleShape2D.new()
 	shape.shape.radius = 5
@@ -152,12 +153,12 @@ func hit(dmg: int, knock := Vector2.ZERO, _status := {}) -> void:
 
 
 func _draw() -> void:
-	var m := Color(4, 4, 4) if _flash > 0 else Color.WHITE
+	var m := Color(4, 4, 4) if _flash > 0 else Color(1.35, 1.3, 1.25)  # 어두운 바닥 위에서 잘 보이게 밝게
 	if _invuln > 0 and _flash <= 0 and not is_dashing() and int(_invuln * 20) % 2 == 0:
 		m.a = 0.35
 	var bob := Vector2(0, -1) if velocity.length() > 10 and int(Time.get_ticks_msec() / 120) % 2 == 0 else Vector2.ZERO
 	draw_set_transform(bob)
-	if not Art.draw(self, "player", aim.x < 0, m):
+	if not Art.draw(self, "player", aim.x < 0, m, 1.0, Color(1.0, 0.95, 0.75, 0.9)):
 		draw_circle(Vector2.ZERO, 5, Color("e8d9a8") * m)
 	draw_set_transform(Vector2.ZERO)
 	draw_line(aim * 8, aim * 12, Color("f8c040", m.a), 1)

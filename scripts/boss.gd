@@ -52,6 +52,7 @@ func setup(k: String, player: Node2D, g: Node, hp_mult: float) -> CharacterBody2
 func _ready() -> void:
 	add_to_group("enemies")
 	add_to_group("boss")
+	Art.unshaded(self)
 	collision_layer = 4
 	collision_mask = 1
 	var shape := CollisionShape2D.new()
@@ -216,6 +217,6 @@ func _draw() -> void:
 	if _pattern == "charge" and fmod(maxf(_pt, 0.0), 1.3) < 0.6 and int(_pt * 20) % 2 == 0:
 		m = Color(2, 1.5, 1.5)
 	draw_set_transform(Vector2(0, roundf(sin(Time.get_ticks_msec() / 300.0) * 1.5)))
-	if not Art.draw(self, kind, target.position.x < position.x, m):
+	if not Art.draw(self, kind, target.position.x < position.x, m, 1.0, Color(1.0, 0.3, 0.15, 0.8)):
 		draw_circle(Vector2.ZERO, radius, color * m)
 	draw_set_transform(Vector2.ZERO)

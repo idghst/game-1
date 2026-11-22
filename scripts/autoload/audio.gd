@@ -59,10 +59,10 @@ func music(name: String) -> void:
 	var old := _music[0]
 	var new := _music[1]
 	_music.reverse()
-	var tw := create_tween().set_parallel()
 	if old.playing:
+		var tw := create_tween()
 		tw.tween_property(old, "volume_db", -40.0, 0.8)
-		tw.chain().tween_callback(old.stop)
+		tw.tween_callback(old.stop)
 	var s := _stream(name, true) if name != "" else null
 	if s:
 		new.stream = s

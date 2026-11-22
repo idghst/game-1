@@ -26,6 +26,7 @@ func setup(k: String, pos: Vector2, p: Node2D, v := 1, it := "") -> Area2D:
 	shape.shape.radius = 10.0 if kind in ["chest", "shop", "stairs"] else 5.0
 	add_child(shape)
 	add_to_group("pickups")
+	Art.unshaded(self)
 	return self
 
 

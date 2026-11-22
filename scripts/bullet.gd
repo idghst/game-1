@@ -25,7 +25,7 @@ func setup(pos: Vector2, vel: Vector2, dmg: int, is_player: bool, opts := {}) ->
 	from_player = is_player
 	collision_layer = 0
 	collision_mask = 1 | (4 if is_player else 2)  # 벽 + (적 | 플레이어)
-	color = opts.get("color", Color("f4e27a") if is_player else Color("ff5a8a"))
+	color = opts.get("color", Color("f4e27a") if is_player else Color("ff2d95"))
 	radius = opts.get("radius", 2.0 if is_player else 2.5)
 	life = opts.get("life", 3.0)
 	pierce = opts.get("pierce", 0)
@@ -39,9 +39,7 @@ func setup(pos: Vector2, vel: Vector2, dmg: int, is_player: bool, opts := {}) ->
 	add_child(shape)
 	body_entered.connect(_on_body_entered)
 	add_to_group("bullets_player" if is_player else "bullets_enemy")
-	var mat := CanvasItemMaterial.new()
-	mat.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED  # 어두운 방에서도 탄이 잘 보이게
-	material = mat
+	Art.unshaded(self)  # 어두운 방에서도 탄이 잘 보이게
 	return self
 
 
@@ -106,8 +104,12 @@ func _explode() -> void:
 
 
 func _draw() -> void:
-	var name := "bullet_player" if from_player else "bullet_enemy"
-	if color != (Color("f4e27a") if from_player else Color("ff5a8a")):
+	if not from_player:
+		# 적 탄: 화면에서 가장 눈에 띄게(검은 테두리 + 형광 분홍 + 흰 심)
+		draw_circle(Vector2.ZERO, radius + 1.0, Color("1a0010"))
+		draw_circle(Vector2.ZERO, radius, color)
+		draw_circle(Vector2.ZERO, maxf(radius - 1.5, 0.8), Color.WHITE)
+	elif color != Color("f4e27a"):
 		draw_circle(Vector2.ZERO, radius, color)  # 치명타·영혼탄처럼 색이 다른 탄
-	elif not Art.draw(self, name, false, Color.WHITE, radius / (2.0 if from_player else 2.5)):
+	elif not Art.draw(self, "bullet_player", false, Color.WHITE, radius / 2.0):
 		draw_circle(Vector2.ZERO, radius, color)

@@ -93,8 +93,8 @@ func _ready() -> void:
 	grad.gradient.set_color(0, Color(1, 0.85, 0.6, 1))
 	grad.gradient.set_color(1, Color(1, 0.85, 0.6, 0))
 	light.texture = grad
-	light.texture_scale = 1.6
-	light.energy = 0.9
+	light.texture_scale = 2.2
+	light.energy = 1.25
 	player.add_child(light)
 	player.hp_changed.connect(_on_hp_changed)
 	player.died.connect(_on_player_died)
@@ -619,6 +619,8 @@ func _draw() -> void:
 		draw_texture_rect(wall_tex, Rect2(0, 0, W, H), true)
 	if floor_tex:
 		draw_texture_rect(floor_tex, Rect2(WALL, WALL, W - 2 * WALL, H - 2 * WALL), true)
+		# 바닥 대비·채도를 낮춰 캐릭터와 탄이 묻히지 않게 한다
+		draw_rect(Rect2(WALL, WALL, W - 2 * WALL, H - 2 * WALL), Color(th.floor, 0.55))
 	else:
 		draw_rect(Rect2(WALL, WALL, W - 2 * WALL, H - 2 * WALL), th.floor)
 	# 벽 안쪽 그림자 띠

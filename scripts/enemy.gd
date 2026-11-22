@@ -59,6 +59,7 @@ func setup(k: String, is_elite: bool, player: Node2D, g: Node, hp_mult: float) -
 
 func _ready() -> void:
 	add_to_group("enemies")
+	Art.unshaded(self)
 	collision_layer = 4
 	collision_mask = 1 | 4  # 벽 + 다른 적
 	var shape := CollisionShape2D.new()
@@ -263,6 +264,7 @@ func _draw() -> void:
 	var bob := Vector2(0, roundf(sin(_t * 8.0) * 0.6)) if kind != "eye" else Vector2(0, roundf(sin(_t * 3.0)))
 	draw_set_transform(bob)
 	var flip := target.position.x < position.x
-	if not Art.draw(self, kind, flip, m, 1.3 if elite else 1.0):
+	var rim := Color(1.0, 0.85, 0.2, 0.9) if elite else Color(1.0, 0.18, 0.12, 0.75)
+	if not Art.draw(self, kind, flip, m, 1.3 if elite else 1.0, rim):
 		draw_circle(Vector2.ZERO, radius, color * m)
 	draw_set_transform(Vector2.ZERO)
