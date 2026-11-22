@@ -45,8 +45,7 @@ func _ready() -> void:
 	_box.custom_minimum_size.x = 120
 	add_child(_box)
 	Menu.button(_box, tr("NEW_RUN"), func() -> void: get_tree().change_scene_to_file("res://main.tscn"))
-	if ResourceLoader.exists("res://scripts/ui/meta_menu.gd"):
-		Menu.button(_box, tr("META_TITLE"), _open_meta)
+	Menu.button(_box, tr("META_TITLE"), _open_meta)
 	Menu.button(_box, tr("SETTINGS"), _open_settings)
 	Menu.button(_box, tr("CREDITS"), _open_credits)
 	if OS.get_name() != "Web":

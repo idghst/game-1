@@ -8,7 +8,7 @@ var frames := 0
 
 var main: Node2D
 var fails := 0
-var step := "start"
+var step := "meta"
 var wait := 0
 var victory := -1
 
@@ -21,7 +21,25 @@ func check(ok: bool, msg: String) -> void:
 
 func _initialize() -> void:
 	MainScene = load("res://main.tscn")  # 오토로드 등록 뒤에 컴파일되도록 런타임에 불러온다
-	_new_main()
+
+
+# 메타 강화가 판 시작 능력치에 반영되는지(실제 저장 파일은 건드리지 않음)
+func _check_meta() -> void:
+	var profile: Node = root.get_node("Profile")
+	profile.path = "user://test_flow_profile.json"
+	profile.data = profile.defaults()
+	profile.data.meta = {"vigor": 2, "might": 3, "purse": 1, "insight": 1, "second_wind": 1}
+	var m: Node2D = MainScene.instantiate()
+	root.add_child(m)
+	check(m.player.max_hp == 8 and m.player.hp == 8 and m.player.damage == 16, "meta vigor/might applied")
+	check(m.gold == 15 and m.choices == 4 and m.revives == 1, "meta purse/insight/second wind applied")
+	m.player.hit(99)
+	check(m.player.hp == 2 and not m.over, "second wind revives once")
+	m.player._invuln = 0.0
+	m.player.hit(99)
+	check(m.over, "second death ends the run")
+	m.free()
+	profile.data = profile.defaults()
 
 
 func _new_main() -> void:
@@ -62,6 +80,11 @@ func _process(_delta: float) -> bool:
 		wait -= 1
 		return false
 	match step:
+		"meta":
+			_check_meta()
+			_new_main()
+			step = "start"
+			wait = 2
 		"start":
 			check(main.alive == 0 and main.cleared.has(Vector2i.ZERO), "start room should be empty and cleared")
 			var tr_cell := _cell_of("treasure")

@@ -39,6 +39,7 @@ func _next() -> void:
 			main._open_meta()
 		return
 	main = load("res://main.tscn").instantiate()
+	main.use_meta = false  # 촬영이 실제 진행 기록을 남기지 않게
 	root.add_child(main)
 	if parts.size() > 1:
 		main.floor_n = int(parts[1])

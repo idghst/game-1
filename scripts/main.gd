@@ -14,6 +14,7 @@ const Upgrades = preload("res://scripts/upgrades.gd")
 const Art = preload("res://scripts/art.gd")
 const PauseMenu = preload("res://scripts/ui/pause_menu.gd")
 const Results = preload("res://scripts/ui/results.gd")
+const Meta = preload("res://scripts/meta.gd")
 
 const W := 480.0
 const H := 270.0
@@ -58,6 +59,11 @@ var camera := Camera2D.new()
 var darkness := CanvasModulate.new()
 var over := false
 var use_meta := true  # false면 메타 강화 없이 시작하고 기록도 남기지 않는다(테스트·밸런스 측정용)
+# 메타 강화가 정하는 판 규칙
+var luck := 0.0
+var floor_heal := false
+var revives := 0
+var choices := 3
 
 # 통계(결과 화면·메타 재화·업적에 쓴다)
 var stats := {"kills": 0, "elites": 0, "bosses": 0, "gold": 0, "time": 0.0, "damage_taken": 0, "rooms": 0, "floor": 1}
@@ -102,6 +108,8 @@ func _ready() -> void:
 	player.hp_changed.connect(_on_hp_changed)
 	player.died.connect(_on_player_died)
 	_build_ui()
+	if use_meta:
+		Meta.apply(Profile.data.meta, player, self)
 	_new_floor()
 	Sfx.music("music_dungeon")
 
@@ -155,6 +163,8 @@ func _new_floor() -> void:
 		if types[c] in ["combat", "gate"]:
 			pillars[c] = PILLAR_LAYOUTS[rng.randi() % PILLAR_LAYOUTS.size()]
 	stats.floor = floor_n
+	if floor_heal and floor_n > 1:
+		player.heal(1)
 	darkness.color = theme_data().ambient
 	_enter(Vector2i.ZERO, Vector2i.ZERO)
 	toast("%s %d\n%s" % [tr("FLOOR"), floor_n, tr(theme_data().name)], 2.5)
@@ -377,7 +387,7 @@ func _clear_room(reward: bool) -> void:
 func _fill_shop(cell: Vector2i) -> void:
 	if not shop_stock.has(cell):
 		var stock := []
-		for id in Upgrades.roll(rng, owned, 3, 0.4):
+		for id in Upgrades.roll(rng, owned, 3, 0.4 + luck):
 			stock.append({"item": id, "price": Upgrades.PRICE[Upgrades.ALL[id].rarity] + 5 * floor_n, "bought": false})
 		stock.append({"item": "heart", "price": 10 + 2 * floor_n, "bought": false})
 		shop_stock[cell] = stock
@@ -441,8 +451,8 @@ func _interact_target() -> Area2D:
 
 # ── 업그레이드 ───────────────────────────────────────────
 
-func _offer_upgrades(luck: float) -> void:
-	var picks := Upgrades.roll(rng, owned, 3, luck)
+func _offer_upgrades(bonus_luck: float) -> void:
+	var picks := Upgrades.roll(rng, owned, choices, bonus_luck + luck)
 	var opts := []
 	for id in picks:
 		var rarity: String = Upgrades.ALL[id].rarity
@@ -535,6 +545,16 @@ func _on_hp_changed() -> void:
 
 
 func _on_player_died() -> void:
+	if revives > 0:  # 재기(메타 강화): 한 번 되살아난다
+		revives -= 1
+		player.hp = 2
+		player._invuln = 2.0
+		player.hp_changed.emit()
+		toast(tr("REVIVED"), 2.0)
+		Fx.burst(room, player.position, Color("f8c040"), 40, 140.0, 0.7)
+		for b in get_tree().get_nodes_in_group("bullets_enemy"):
+			b.queue_free()
+		return
 	_finish(false)
 
 
