@@ -73,6 +73,7 @@ func _next() -> void:
 
 
 func _shoot(dir: Vector2, spd: float, big := false) -> void:
+	Sfx.play("enemy_shoot", -12.0, randf_range(0.8, 1.0))
 	var opts := {"radius": 3.5} if big else {}
 	get_parent().add_child.call_deferred(Bullet.new().setup(position + dir * (radius + 2), dir * spd, 1, false, opts))
 
@@ -88,6 +89,7 @@ func _physics_process(delta: float) -> void:
 	if _spawn_t > 0:
 		_spawn_t -= delta
 		if _spawn_t <= 0:
+			Sfx.play("boss_roar")
 			_next()
 		return
 	var to := target.position - position
@@ -180,10 +182,12 @@ func hit(dmg: int, _knock := Vector2.ZERO, _status := {}) -> void:
 	hp -= dmg
 	_flash = 0.06
 	Fx.burst(get_parent(), position, Color("ffffff", 0.8), 3, 60.0, 0.2)
+	Sfx.play("hit", -10.0, randf_range(0.7, 0.9))
 	var phases := _phases().size()
 	var want_phase := mini(int((1.0 - float(hp) / max_hp) * phases), phases - 1)
 	if want_phase > phase:
 		phase = want_phase
+		Sfx.play("boss_roar", 0.0, 1.15)
 		Fx.shake(0.6)
 		_ring(24, 60.0, 0.0, true)
 		_idx = 0
@@ -196,6 +200,7 @@ func die(rewards: bool) -> void:
 		return
 	hp = 0
 	Fx.burst(get_parent(), position, color, 60, 160.0, 0.9)
+	Sfx.play("explode", 2.0, 0.7)
 	Fx.shake(1.0)
 	Fx.hitstop(0.25)
 	remove_from_group("enemies")

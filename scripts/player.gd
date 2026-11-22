@@ -85,6 +85,7 @@ func _physics_process(delta: float) -> void:
 		dash_count += 1
 		_invuln = maxf(_invuln, DASH_TIME + (0.2 if phantom else 0.06))  # 대시 무적 프레임
 		Fx.burst(get_parent(), position, Color("e8d9a8", 0.6), 6, 40.0)
+		Sfx.play("dash", -4.0)
 	if _dash_left > 0:
 		_dash_left -= delta
 		velocity = _dash_dir * DASH_SPEED
@@ -129,6 +130,7 @@ func shoot() -> void:
 			opts.radius = 3.0
 		bullet_parent.add_child(Bullet.new().setup(muzzle, dir * shot_speed, damage * (2 if is_crit else 1), true, opts))
 	Fx.burst(bullet_parent, muzzle, Color("f4e27a"), 3, 50.0, 0.12)
+	Sfx.play("shoot", -9.0, randf_range(0.92, 1.08))
 	_knock -= aim * 12  # 약한 반동
 
 
@@ -143,6 +145,7 @@ func hit(dmg: int, knock := Vector2.ZERO, _status := {}) -> void:
 	Fx.shake(0.55)
 	Fx.hitstop(0.09)
 	Fx.burst(get_parent(), position, Color("d63c3c"), 14, 90.0)
+	Sfx.play("player_die" if hp == 0 else "player_hurt")
 	hp_changed.emit()
 	if hp == 0:
 		died.emit()

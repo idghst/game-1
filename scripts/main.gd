@@ -100,6 +100,7 @@ func _ready() -> void:
 	player.died.connect(_on_player_died)
 	_build_ui()
 	_new_floor()
+	Sfx.music("music_dungeon")
 
 
 func _build_ui() -> void:
@@ -209,6 +210,7 @@ func _enter(cell: Vector2i, moved: Vector2i) -> void:
 				boss.died.connect(_on_enemy_died)
 				room.add_child(boss)
 				alive += 1
+				Sfx.music("music_boss")
 				toast(tr("BOSS_" + BOSSES[floor_n].to_upper()), 2.5)
 			_:
 				_clear_room(false)
@@ -343,6 +345,10 @@ func _on_enemy_died(e: Node, rewards: bool) -> void:
 
 func _clear_room(reward: bool) -> void:
 	cleared[current] = true
+	if door_body and reward:
+		Sfx.play("door")
+	if types[current] == "boss":
+		Sfx.music("music_dungeon")
 	if door_body:
 		door_body.queue_free()
 		door_body = null
@@ -388,11 +394,13 @@ func _on_pickup_taken(p: Area2D) -> void:
 			_gold_frac -= n
 			gold += n
 			stats.gold += n
+			Sfx.play("coin", -6.0, randf_range(0.95, 1.1))
 			Fx.burst(room, p.position, Color("f0c040"), 4, 30.0, 0.2)
 		"heart":
 			if player.hp >= player.max_hp:
 				return  # 체력이 가득하면 남겨 둔다
 			player.heal(2)
+			Sfx.play("pickup")
 			Fx.burst(room, p.position, Color("e03a4a"), 8, 40.0)
 		"chest":
 			looted[current] = true
@@ -405,6 +413,7 @@ func _on_pickup_taken(p: Area2D) -> void:
 			if p.item == "heart" and player.hp >= player.max_hp:
 				return
 			gold -= p.value
+			Sfx.play("upgrade")
 			shop_stock[current][p.get_meta("slot")].bought = true
 			if p.item == "heart":
 				player.heal(2)
@@ -412,6 +421,7 @@ func _on_pickup_taken(p: Area2D) -> void:
 				_take_upgrade(p.item)
 			Fx.burst(room, p.position, Color("b080e0"), 16, 70.0)
 		"stairs":
+			Sfx.play("stairs")
 			floor_n += 1
 			_new_floor()
 			return
@@ -439,6 +449,7 @@ func _offer_upgrades(luck: float) -> void:
 
 
 func _take_upgrade(id: String) -> void:
+	Sfx.play("upgrade")
 	owned.append(id)
 	Upgrades.apply(id, player)
 	var tag: String = Upgrades.ALL[id].tag
@@ -508,6 +519,9 @@ func _finish(victory: bool) -> void:
 		return
 	over = true
 	stats.damage_taken = player.hits_taken
+	Sfx.music("")
+	if victory:
+		Sfx.play("victory")
 	run_finished.emit(victory)
 	var title := tr("VICTORY") if victory else tr("GAME_OVER")
 	_menu("%s\n%s %d  %s  %d %s" % [title, tr("FLOOR"), floor_n, _clock(stats.time), stats.kills, tr("KILLS")],

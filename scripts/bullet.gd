@@ -98,6 +98,7 @@ func _wall_normal() -> Vector2:
 
 func _explode() -> void:
 	Fx.burst(get_parent(), position, Color("ff9a40"), 16, 90.0, 0.3)
+	Sfx.play("explode", -10.0, randf_range(1.1, 1.3))
 	Fx.shake(0.12)
 	for e in get_tree().get_nodes_in_group("enemies"):
 		if e.position.distance_to(position) < explode and not _hit.has(e.get_instance_id()):

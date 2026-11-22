@@ -72,6 +72,7 @@ func _cool(base: float) -> float:
 
 
 func _shoot(dir: Vector2, spd: float, big := false) -> void:
+	Sfx.play("enemy_shoot", -14.0, randf_range(0.9, 1.1))
 	var opts := {"radius": 3.5} if big else {}
 	get_parent().add_child.call_deferred(Bullet.new().setup(position + dir * (radius + 2), dir * spd * bullet_speed_mult, 1, false, opts))
 
@@ -216,6 +217,7 @@ func hit(dmg: int, knock := Vector2.ZERO, status := {}) -> void:
 	if status.get("burn", false):
 		_burn_t = 2.0
 	Fx.burst(get_parent(), position, Color("ffffff", 0.8), 4, 60.0, 0.2)
+	Sfx.play("hit", -8.0, randf_range(0.9, 1.15))
 	_damage(dmg)
 
 
@@ -232,6 +234,7 @@ func die(rewards: bool) -> void:
 	hp = 0
 	Fx.burst(get_parent(), position, color, 18 if not elite else 30, 110.0, 0.45)
 	if rewards:
+		Sfx.play("enemy_die", -4.0 if elite else -7.0, randf_range(0.85, 1.1))
 		Fx.shake(0.25 if not elite else 0.4)
 		Fx.hitstop(0.045 if not elite else 0.08)
 		if kind == "bloater":

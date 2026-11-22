@@ -2,7 +2,9 @@
 //! - `forge gen`   : assets/src/manifest.txt의 원본 이미지를 맥미니 이미지 생성기로 만든다(이미 있으면 건너뜀).
 //! - `forge pixel` : 원본을 게임용 픽셀아트(assets/sprites/*.png)로 축소·팔레트 정리한다.
 //! - `forge sheet <out.png>` : 확인용으로 모든 스프라이트를 확대해 한 장에 모은다.
+//! - `forge sfx`   : 효과음·배경음을 합성해 assets/audio/*.wav로 쓴다.
 
+mod audio;
 mod pixel;
 
 use std::path::{Path, PathBuf};
@@ -95,9 +97,10 @@ fn main() {
     match args.first().map(String::as_str) {
         Some("gen") => gen(&root, args.get(1).map(String::as_str)),
         Some("pixel") => pixel::run(&root, &manifest(&root)),
+        Some("sfx") => audio::run(&root),
         Some("sheet") => pixel::sheet(&root, &manifest(&root), Path::new(args.get(1).map(String::as_str).unwrap_or("sheet.png"))),
         _ => {
-            eprintln!("사용법: forge <gen [이름] | pixel | sheet <out.png>>");
+            eprintln!("사용법: forge <gen [이름] | pixel | sheet <out.png> | sfx>");
             exit(2);
         }
     }
