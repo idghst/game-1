@@ -25,10 +25,13 @@ var ui: CanvasLayer
 var hud: Control
 var hud_label: Label
 var theme_small := Theme.new()
+var camera := Camera2D.new()
 
 
 func _ready() -> void:
 	rng.randomize()
+	camera.position = Vector2(W, H) / 2
+	add_child(camera)
 	theme_small.default_font_size = 10
 	player = Player.new()
 	add_child(player)
@@ -123,6 +126,10 @@ func _add_rect(body: StaticBody2D, r: Rect2) -> void:
 	shape.shape.size = r.size
 	shape.position = r.get_center()
 	body.add_child(shape)
+
+
+func _process(_delta: float) -> void:
+	camera.offset = Fx.shake_offset(6.0)
 
 
 func _physics_process(_delta: float) -> void:

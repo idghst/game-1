@@ -3,9 +3,13 @@ config_version=5
 
 [application]
 
-config/name="Dungeon Prototype"
+config/name="Hollow Vigil"
 run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
+
+[autoload]
+
+Fx="*res://scripts/autoload/fx.gd"
 
 [display]
 
@@ -53,6 +57,10 @@ aim_up={
 aim_down={
 "deadzone": 0.3,
 "events": [Object(InputEventJoypadMotion,"axis":3,"axis_value":1.0)]
+}
+dash={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":32), Object(InputEventKey,"physical_keycode":4194325), Object(InputEventJoypadButton,"button_index":9), Object(InputEventJoypadMotion,"axis":4,"axis_value":1.0)]
 }
 shoot={
 "deadzone": 0.5,

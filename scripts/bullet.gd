@@ -34,7 +34,9 @@ func _on_body_entered(body: Node) -> void:
 		return
 	_spent = true
 	if body.has_method("hit"):
-		body.hit(damage)
+		body.hit(damage, velocity.normalized())
+	else:
+		Fx.burst(get_parent(), position, color, 4, 40.0, 0.15)
 	queue_free()
 
 

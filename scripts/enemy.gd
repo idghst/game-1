@@ -10,6 +10,7 @@ var speed := 55.0
 var target: Node2D
 var _cooldown := 1.0
 var _flash := 0.0
+var _knock := Vector2.ZERO
 
 
 func setup(is_ranged: bool, player: Node2D, floor_n: int) -> CharacterBody2D:
@@ -48,18 +49,25 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity = dir * speed
 		if to.length() < 12:
-			target.hit(1)
+			target.hit(1, dir)
+	velocity += _knock
+	_knock = _knock.move_toward(Vector2.ZERO, 700 * delta)
 	move_and_slide()
 	_flash -= delta
 	queue_redraw()
 
 
-func hit(dmg: int) -> void:
+func hit(dmg: int, knock := Vector2.ZERO) -> void:
 	if hp <= 0:
 		return
 	hp -= dmg
 	_flash = 0.08
+	_knock = knock.limit_length(1.0) * 160
+	Fx.burst(get_parent(), position, Color("ffffff", 0.8), 4, 60.0, 0.2)
 	if hp <= 0:
+		Fx.burst(get_parent(), position, Color("c0392b") if not ranged else Color("9b59d0"), 18, 110.0, 0.45)
+		Fx.shake(0.25)
+		Fx.hitstop(0.045)
 		died.emit()
 		queue_free()
 
