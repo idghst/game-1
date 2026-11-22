@@ -29,18 +29,18 @@ wall_catacomb | tile | 32x32 | none | seamless tileable pixel art texture of ver
 floor_sanctum | tile | 32x32 | none | seamless tileable top-down pixel art dungeon floor texture of charred dark red stone slabs with faint glowing ember cracks, no objects
 wall_sanctum | tile | 32x32 | none | seamless tileable pixel art texture of black basalt bricks with thin glowing orange cracks, top-down
 title | bg | 480x270 | none | dark fantasy pixel art scene of a ruined gothic cathedral crypt entrance at night, a lone hooded wanderer with a glowing lantern standing before the gates, drifting embers, moody purple and amber lighting, wide cinematic composition
-# badge: Steam 업적 아이콘(store/achievements/<이름에서 ach_ 뺀 업적 ID>.png). 순서 = scripts/autoload/achievements.gd의 ALL
+# badge: Steam 업적 아이콘(store/achievements/<이름에서 ach_ 뺀 업적 ID>.png). 순서 = scripts/autoload/achievements.gd의 ALL. 키 뒤 +rim: 잿빛 1px 외곽선 추가
 ach_first_blood | badge | 64x64 | green | a bloodied silver dagger with a big crimson blood drop falling from its tip
 ach_warden | badge | 64x64 | magenta | a cracked broken skull wearing a bone crown, split in half
 ach_matron | badge | 64x64 | magenta | a drowned ghostly nun's hooded face with glowing cyan eyes rising from teal water waves
-ach_king | badge | 64x64 | green | a broken black iron crown with glowing orange ember cracks and small flames
-ach_untouched | badge | 64x64 | magenta | a pristine shining silver knight shield with a white glow, unscratched
+ach_king | badge | 64x64 | green+rim | a broken black iron crown with glowing orange ember cracks and small flames
+ach_untouched | badge | 64x64 | magenta | a pristine silver knight shield with a shiny gold rim and a glowing blue gem in the center, one bright white sparkle highlight, unscratched
 ach_synergy | badge | 64x64 | green | two interlocked glowing magic rings, one crimson and one blue, with sparkles
 ach_legendary | badge | 64x64 | green | an ornate golden relic amulet with a large glowing purple gem, radiant light rays
 ach_hoarder | badge | 64x64 | magenta | a heap of shiny gold coins spilling from an open leather coin pouch
 ach_slayer | badge | 64x64 | green | a pile of many bone white skulls with a bloodied sword stuck on top
-ach_elite_hunter | badge | 64x64 | green | a large horned demon skull with glowing red eyes pierced by a crossbow bolt
+ach_elite_hunter | badge | 64x64 | green | a large horned demon skull with glowing red eyes, a thick wooden crossbow bolt with big red feather fletching stuck deep into the cracked forehead
 ach_swift_vigil | badge | 64x64 | magenta | a brass hourglass with glowing amber sand and a small flame on top
 ach_devoted | badge | 64x64 | green | a small stone altar with a bright orange ember flame burning on top
-ach_dasher | badge | 64x64 | magenta | a single large bright teal leather boot seen from the side with big white feathered wings on the heel, three white speed lines behind it
+ach_dasher | badge | 64x64 | magenta | a single large brown leather boot seen from the side with big white feathered wings on the heel, three bold thick solid white speed lines attached to the back of the heel and extending far behind it
 ach_persistent | badge | 64x64 | magenta | an old brass hanging lantern with a steady warm amber flame inside

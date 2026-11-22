@@ -15,16 +15,16 @@ Steam API 이름은 ID를 대문자로 바꾼 것입니다(`steam/README.md`).
 | `first_blood` (FIRST_BLOOD) | First Blood / 첫 피 | 처음으로 적 처치(누적 처치 1) | 피 묻은 단검과 핏방울 | `first_blood.png`, `first_blood_locked.png` |
 | `warden` (WARDEN) | Bone Breaker / 뼈 부수는 자 | 뼈의 파수꾼(3층 보스) 처치 | 뼈 왕관을 쓴 갈라진 해골 | `warden.png`, `warden_locked.png` |
 | `matron` (MATRON) | Tide Breaker / 물결을 가르는 자 | 익사한 수녀원장(6층 보스) 처치 | 물결 위 청록 눈의 수녀 유령 | `matron.png`, `matron_locked.png` |
-| `king` (KING) | Vigil Kept / 지켜진 불침번 | 재의 왕(9층 최종 보스) 처치 | 잿불이 갈라진 검은 왕관 | `king.png`, `king_locked.png` |
-| `untouched` (UNTOUCHED) | Untouched / 무결 | 피해 없이 한 층 돌파 | 흠집 없는 은빛 방패 | `untouched.png`, `untouched_locked.png` |
+| `king` (KING) | Vigil Kept / 지켜진 불침번 | 재의 왕(9층 최종 보스) 처치 | 잿불이 갈라진 검은 왕관(잿빛 1px 외곽선) | `king.png`, `king_locked.png` |
+| `untouched` (UNTOUCHED) | Untouched / 무결 | 피해 없이 한 층 돌파 | 금 테두리·푸른 보석의 흠집 없는 방패 | `untouched.png`, `untouched_locked.png` |
 | `synergy` (SYNERGY) | Harmony / 조화 | 시너지 발동 | 맞물린 붉은·푸른 마법 고리 | `synergy.png`, `synergy_locked.png` |
 | `legendary` (LEGENDARY) | Relic Seeker / 유물 사냥꾼 | 전설 축복 획득 | 보라 보석 박힌 황금 유물 | `legendary.png`, `legendary_locked.png` |
 | `hoarder` (HOARDER) | Hoarder / 수집가 | 금화 150개를 한 번에 보유 | 주머니에서 쏟아지는 금화 | `hoarder.png`, `hoarder_locked.png` |
 | `slayer` (SLAYER) | Slayer / 학살자 | 누적 1000마리 처치 | 해골 더미와 검 | `slayer.png`, `slayer_locked.png` |
-| `elite_hunter` (ELITE_HUNTER) | Elite Hunter / 엘리트 사냥꾼 | 누적 엘리트 50마리 처치 | 화살 박힌 뿔 달린 악마 해골 | `elite_hunter.png`, `elite_hunter_locked.png` |
+| `elite_hunter` (ELITE_HUNTER) | Elite Hunter / 엘리트 사냥꾼 | 누적 엘리트 50마리 처치 | 붉은 깃 쇠뇌 화살이 박힌 뿔 달린 해골 | `elite_hunter.png`, `elite_hunter_locked.png` |
 | `swift_vigil` (SWIFT_VIGIL) | Swift Vigil / 재빠른 불침번 | 18분 안에 승리 | 불꽃 얹힌 모래시계 | `swift_vigil.png`, `swift_vigil_locked.png` |
 | `devoted` (DEVOTED) | Devoted / 헌신 | 잿불 제단 강화 합계 5단계 | 잿불이 타는 돌 제단 | `devoted.png`, `devoted_locked.png` |
-| `dasher` (DASHER) | Restless / 쉴 새 없이 | 누적 대시 500회 | 속도선을 남기는 날개 장화 | `dasher.png`, `dasher_locked.png` |
+| `dasher` (DASHER) | Restless / 쉴 새 없이 | 누적 대시 500회 | 뒤꿈치에서 속도선이 뻗는 날개 달린 가죽 장화 | `dasher.png`, `dasher_locked.png` |
 | `persistent` (PERSISTENT) | Persistent / 끈기 | 10판 시작 | 불 켜진 놋쇠 등불 | `persistent.png`, `persistent_locked.png` |
 
 ## 다시 만들기
@@ -36,5 +36,6 @@ tools/forge/target/release/forge gen ach_king   # 원본 하나 생성(이름 �
 tools/forge/target/release/forge pixel          # 이 폴더의 64·256·sheet를 모두 다시 씀
 ```
 
-미달성 아이콘은 달성본의 밝기만 남겨 0.45배로 누르고 바탕이 묻히지 않게 조금 띄운 뒤 팔레트의 회색 단계로 맞춘 결정적 변환입니다(`tools/forge/src/pixel.rs`의 `locked`).
+미달성 아이콘은 같은 원본에서 결정적으로 만듭니다(`tools/forge/src/pixel.rs`의 `badge`·`locked`). 밝기만 남겨 0.45배로 누르고 팔레트 회색 단계로 맞추되, 그림 부분은 바탕 원판보다 2단계 밝은 회색부터 시작해 단계를 3분의 1로 압축하므로 원래 어두운 그림도 실루엣이 읽힙니다.
+manifest에서 배경 키 뒤에 `+rim`을 붙이면(`ach_king`) 외곽선 밖에 잿빛 1px을 더 두르고, 초록 키 원본은 축소 후 남은 초록 찌꺼기를 지웁니다.
 `forge test`의 `tests/test_achievement_icons.gd`가 파일 이름·개수·크기를 업적 정의와 맞춰 봅니다.
