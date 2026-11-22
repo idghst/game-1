@@ -145,7 +145,7 @@ func _physics_process(_delta: float) -> void:
 
 func _on_enemy_died() -> void:
 	enemies_left -= 1
-	if enemies_left > 0:
+	if enemies_left > 0 or player.hp == 0:  # 같은 프레임에 사망했으면 게임오버 메뉴만 띄운다
 		return
 	cleared[current] = true
 	door_body.queue_free()
