@@ -24,7 +24,7 @@ tools/forge/target/release/forge steam-addon
 
 ## 3. Steamworks에서 직접 할 일
 
-1. App ID와 플랫폼별 Depot 3개(Windows, macOS, Linux)를 만듭니다.
+1. App ID와 플랫폼별 Depot을 만듭니다: Windows·macOS(메인), Linux(부가, 출시 범위에 넣을 때).
 2. **업적 14개**를 아래 API 이름으로 만듭니다(이름·설명은 `translations/strings.csv`의 `ACH_*` 참고).
 
    | API 이름 | 영어 이름 | 조건 |
@@ -47,8 +47,8 @@ tools/forge/target/release/forge steam-addon
 3. **Steam Cloud**: 앱 설정에서 Cloud를 켜고 바이트 쿼터(예: 1MB)와 파일 수(예: 4)를 정합니다.
    게임은 `ISteamRemoteStorage`로 `profile.json`(메타 진행·통계·업적)을 직접 올리고 받으며, 더 최근 저장을 씁니다.
    설정 파일(`settings.cfg`)은 PC마다 다르므로 올리지 않습니다.
-4. 실행 옵션(Launch Options): Windows `HollowVigil.exe`, macOS `HollowVigil.app`, Linux `HollowVigil.x86_64`.
-5. Steam Deck 호환성 검토 신청(게임패드 전용 조작, 기본 해상도 1280x800에서 정수 배율 2배 + 레터박스).
+4. 실행 옵션(Launch Options): Windows `HollowVigil.exe`, macOS `Hollow Vigil.app`, Linux `HollowVigil.x86_64`.
+5. (부가) Steam Deck 호환성 검토 신청(게임패드 전용 조작, 1280x800에서 정수 배율 2배 + 레터박스).
 
 ## 4. 빌드와 업로드
 

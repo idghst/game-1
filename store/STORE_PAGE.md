@@ -20,7 +20,7 @@ Hollow Vigil is a fast twin-stick roguelite with hand-tuned bullet patterns and 
 - **Seven enemy families, elite variants and three bosses** — the Bone Warden, the Drowned Matron and the Ashen King — each with escalating phases.
 - **22 blessings across four rarities.** Gather three of a kind to awaken synergies: Warlord, Tempest, Arcanist and Bloodbound.
 - **The Ember Altar.** Every run earns embers for 10 permanent upgrades, from extra vigor to a once-per-run Second Wind.
-- **Made for controllers and Steam Deck.** Every menu works with a gamepad; keys and buttons are fully rebindable.
+- **Made for controllers.** Every menu works with a gamepad (Xbox and other XInput pads); keys and buttons are fully rebindable.
 - **14 achievements and Steam Cloud saves.** Fully playable in English and Korean.
 
 **한국어**
@@ -33,7 +33,7 @@ Hollow Vigil is a fast twin-stick roguelite with hand-tuned bullet patterns and 
 - **적 일곱 계열과 엘리트, 보스 셋** — 뼈의 파수꾼, 익사한 수녀원장, 재의 왕. 체력이 줄수록 패턴이 거세집니다.
 - **희귀도 4단계의 축복 22가지.** 같은 계열 셋을 모으면 전쟁군주·폭풍·비전술사·피의 맹약 시너지가 깨어납니다.
 - **잿불 제단.** 판마다 얻는 잿불로 영구 강화 10가지를 해금하세요. 최대 체력부터 한 번의 재기까지.
-- **게임패드·Steam Deck 친화.** 모든 메뉴를 패드로 조작하고 키와 버튼을 자유롭게 바꿀 수 있습니다.
+- **게임패드 친화.** 모든 메뉴를 패드(Xbox 등 XInput 패드)로 조작하고 키와 버튼을 자유롭게 바꿀 수 있습니다.
 - **업적 14개와 Steam Cloud 저장.** 한국어·영어 지원.
 
 ## 특징 요약 (태그 후보)
@@ -44,7 +44,7 @@ Roguelite, Twin Stick Shooter, Bullet Hell, Pixel Graphics, Dark Fantasy, Dungeo
 
 | | 최소 |
 |---|---|
-| OS | Windows 10 64-bit / macOS 11 / Ubuntu 22.04 (SteamOS) |
+| OS | Windows 10/11 64-bit · macOS 11 이상(Apple Silicon·Intel). Linux/SteamOS는 부가 지원(출시 범위 결정 후 표기) |
 | 프로세서 | 2코어 2GHz |
 | 메모리 | 2GB RAM |
 | 그래픽 | OpenGL 3.3 지원 |
