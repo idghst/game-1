@@ -3,6 +3,9 @@ extends Area2D
 
 signal taken(pickup: Area2D)
 
+const Art = preload("res://scripts/art.gd")
+const Upgrades = preload("res://scripts/upgrades.gd")
+
 var kind := "coin"  # coin | heart | chest | shop | stairs
 var value := 1  # 동전 액수 또는 상품 가격
 var item := ""  # 상점 상품: 업그레이드 id 또는 "heart"
@@ -46,19 +49,21 @@ func _physics_process(delta: float) -> void:
 func _draw() -> void:
 	var bob := Vector2(0, roundf(sin(_t * 4.0)))
 	match kind:
-		"coin":
-			draw_rect(Rect2(Vector2(-2, -2) + bob, Vector2(4, 4)), Color("f0c040"))
-			draw_rect(Rect2(Vector2(-1, -1) + bob, Vector2(1, 1)), Color.WHITE)
-		"heart":
-			draw_circle(Vector2(-2, -1) + bob, 2.2, Color("e03a4a"))
-			draw_circle(Vector2(2, -1) + bob, 2.2, Color("e03a4a"))
-			draw_colored_polygon(PackedVector2Array([Vector2(-4, 0) + bob, Vector2(4, 0) + bob, Vector2(0, 4) + bob]), Color("e03a4a"))
-		"chest":
-			draw_rect(Rect2(-8, -6, 16, 12), Color("8a5a2a"))
-			draw_rect(Rect2(-8, -2, 16, 2), Color("f0c040"))
-		"shop":
-			draw_rect(Rect2(-7, 4, 14, 3), Color("3a3040"))
-			draw_circle(Vector2(0, -2) + bob, 4, Color("e03a4a") if item == "heart" else Color("b080e0"))
+		"coin", "heart", "chest":
+			draw_set_transform(bob if kind != "chest" else Vector2.ZERO)
+			Art.draw(self, kind)
 		"stairs":
-			for i in 4:
-				draw_rect(Rect2(-10 + i * 2, -8 + i * 4, 20 - i * 4, 4), Color("0a080c").lerp(Color("6a5a80"), i / 4.0))
+			Art.draw(self, "stairs")
+		"shop":
+			draw_rect(Rect2(-8, 5, 16, 3), Color("3a3040"))
+			draw_set_transform(bob + Vector2(0, -2))
+			if item == "heart":
+				Art.draw(self, "heart")
+			else:
+				var up: Dictionary = Upgrades.ALL[item]
+				draw_rect(Rect2(-7, -7, 14, 14), Upgrades.RARITY_COLOR[up.rarity], false, 1.0)
+				Art.draw(self, "icon_" + up.tag)
+			draw_set_transform(Vector2.ZERO)
+			var font := ThemeDB.fallback_font
+			draw_string(font, Vector2(-20, 18), "%dg" % value, HORIZONTAL_ALIGNMENT_CENTER, 40, 8, Color("f8c040"))
+	draw_set_transform(Vector2.ZERO)

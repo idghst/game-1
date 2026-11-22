@@ -1,0 +1,12 @@
+[package]
+name = "forge"
+version = "0.1.0"
+edition = "2021"
+description = "Hollow Vigil 에셋·빌드 자동화 도구"
+publish = false
+
+[dependencies]
+image = { version = "0.25", default-features = false, features = ["png"] }
+
+[profile.release]
+opt-level = 3

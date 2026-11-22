@@ -4,6 +4,7 @@ signal hp_changed
 signal died
 
 const Bullet = preload("res://scripts/bullet.gd")
+const Art = preload("res://scripts/art.gd")
 const DASH_TIME := 0.16
 const DASH_SPEED := 320.0
 
@@ -148,8 +149,12 @@ func hit(dmg: int, knock := Vector2.ZERO, _status := {}) -> void:
 
 
 func _draw() -> void:
-	var c := Color.WHITE if _flash > 0 else Color("e8d9a8")
+	var m := Color(4, 4, 4) if _flash > 0 else Color.WHITE
 	if _invuln > 0 and _flash <= 0 and not is_dashing() and int(_invuln * 20) % 2 == 0:
-		c.a = 0.3
-	draw_circle(Vector2.ZERO, 5, c)
-	draw_line(aim * 5, aim * 10, c, 2)
+		m.a = 0.35
+	var bob := Vector2(0, -1) if velocity.length() > 10 and int(Time.get_ticks_msec() / 120) % 2 == 0 else Vector2.ZERO
+	draw_set_transform(bob)
+	if not Art.draw(self, "player", aim.x < 0, m):
+		draw_circle(Vector2.ZERO, 5, Color("e8d9a8") * m)
+	draw_set_transform(Vector2.ZERO)
+	draw_line(aim * 8, aim * 12, Color("f8c040", m.a), 1)

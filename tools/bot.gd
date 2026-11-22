@@ -3,6 +3,11 @@ extends Node
 ## 밸런스 스모크·장시간 안정성 테스트·스크린샷에 쓴다. main에 자식으로 붙인다.
 
 var main: Node2D
+## 실력(0~1). 1이면 완벽 조준·즉시 회피. 낮을수록 조준 오차가 커지고, 판단이 늦어지며, 탄을 놓친다.
+var skill := 1.0
+var _aim_err := 0.0
+var _decide_t := 0.0
+var _move_cache := Vector2.ZERO
 var _stuck_t := 0.0
 var _jitter := Vector2.ZERO
 var _last_pos := Vector2.ZERO
@@ -47,7 +52,9 @@ func _physics_process(delta: float) -> void:
 			if e.position.distance_to(p.position) < near.position.distance_to(p.position):
 				near = e
 		var to: Vector2 = near.position - p.position
-		_press_vec("aim_", to.normalized())
+		# 조준 오차: 천천히 흔들리는 각도 오차(사람 손떨림 흉내)
+		_aim_err = clampf(_aim_err + randf_range(-0.08, 0.08), -1.0, 1.0)
+		_press_vec("aim_", to.normalized().rotated(_aim_err * (1.0 - skill) * 0.6))
 		Input.action_press("shoot")
 		move = to.normalized() * (1.0 if to.length() > 140 else (-1.0 if to.length() < 90 else 0.0))
 		move += to.normalized().orthogonal() * 0.6
@@ -57,11 +64,13 @@ func _physics_process(delta: float) -> void:
 				move += (p.position - e.position).normalized() * (60 - d) / 30
 		var danger := false
 		for b in get_tree().get_nodes_in_group("bullets_enemy"):
+			if randf() > skill:  # 실력이 낮으면 일부 탄을 못 본다
+				continue
 			var rel: Vector2 = p.position - b.position
 			if rel.length() < 50 and b.velocity.dot(rel) > 0:
 				move += b.velocity.normalized().orthogonal() * signf(b.velocity.normalized().orthogonal().dot(rel)) * 1.5
 				danger = danger or rel.length() < 16
-		if danger and not _dash_pressed:
+		if danger and not _dash_pressed and randf() < skill:
 			Input.action_press("dash")
 			_dash_pressed = true
 		move += (Vector2(240, 135) - p.position) / 240.0  # 벽에서 떨어지기
@@ -88,6 +97,12 @@ func _physics_process(delta: float) -> void:
 		_stuck_t += delta
 		move = _jitter
 	_last_pos = p.position
+	# 반응 지연: 실력이 낮으면 이동 판단을 드문드문 갱신한다(최대 0.35초)
+	_decide_t -= delta
+	if _decide_t <= 0 or enemies.is_empty():
+		_decide_t = (1.0 - skill) * 0.35
+		_move_cache = move
+	move = _move_cache
 	_press_vec("move_", move.normalized() if move.length() > 0.1 else Vector2.ZERO)
 
 

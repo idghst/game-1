@@ -4,6 +4,7 @@ extends CharacterBody2D
 signal died(enemy: Node, rewards: bool)
 
 const Bullet = preload("res://scripts/bullet.gd")
+const Art = preload("res://scripts/art.gd")
 const KINDS := {
 	"warden": {"hp": 600, "radius": 14.0, "speed": 40.0, "color": Color("d8d0b8"),
 		"patterns": [["ring", "charge", "fan", "summon"], ["ring", "charge", "fan", "summon", "charge"]]},
@@ -206,9 +207,10 @@ func _draw() -> void:
 	if _spawn_t > 0:
 		draw_arc(Vector2.ZERO, radius * (1.0 + _spawn_t), 0, TAU, 32, color, 2.0)
 		return
-	var c := Color.WHITE if _flash > 0 else color
+	var m := Color(4, 4, 4) if _flash > 0 else Color.WHITE
 	if _pattern == "charge" and fmod(maxf(_pt, 0.0), 1.3) < 0.6 and int(_pt * 20) % 2 == 0:
-		c = c.lightened(0.5)
-	draw_circle(Vector2.ZERO, radius, c)
-	draw_arc(Vector2.ZERO, radius + 3, 0, TAU, 32, Color("f0c040"), 2.0)
-	draw_circle((target.position - position).limit_length(radius * 0.4), radius * 0.3, Color.BLACK)
+		m = Color(2, 1.5, 1.5)
+	draw_set_transform(Vector2(0, roundf(sin(Time.get_ticks_msec() / 300.0) * 1.5)))
+	if not Art.draw(self, kind, target.position.x < position.x, m):
+		draw_circle(Vector2.ZERO, radius, color * m)
+	draw_set_transform(Vector2.ZERO)

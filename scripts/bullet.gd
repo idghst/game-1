@@ -1,6 +1,8 @@
 extends Area2D
 ## 플레이어 탄과 적 탄. 플레이어 탄은 관통·튕김·유도·폭발·화상·감속을 가질 수 있다.
 
+const Art = preload("res://scripts/art.gd")
+
 var velocity := Vector2.ZERO
 var damage := 10
 var color := Color.WHITE
@@ -37,6 +39,9 @@ func setup(pos: Vector2, vel: Vector2, dmg: int, is_player: bool, opts := {}) ->
 	add_child(shape)
 	body_entered.connect(_on_body_entered)
 	add_to_group("bullets_player" if is_player else "bullets_enemy")
+	var mat := CanvasItemMaterial.new()
+	mat.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED  # 어두운 방에서도 탄이 잘 보이게
+	material = mat
 	return self
 
 
@@ -100,6 +105,8 @@ func _explode() -> void:
 
 
 func _draw() -> void:
-	draw_circle(Vector2.ZERO, radius, color)
-	if radius > 2.5:
-		draw_circle(Vector2.ZERO, radius - 1.5, Color.WHITE)
+	var name := "bullet_player" if from_player else "bullet_enemy"
+	if color != (Color("f4e27a") if from_player else Color("ff5a8a")):
+		draw_circle(Vector2.ZERO, radius, color)  # 치명타·영혼탄처럼 색이 다른 탄
+	elif not Art.draw(self, name, false, Color.WHITE, radius / (2.0 if from_player else 2.5)):
+		draw_circle(Vector2.ZERO, radius, color)

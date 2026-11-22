@@ -4,6 +4,7 @@ extends CharacterBody2D
 signal died(enemy: Node, rewards: bool)
 
 const Bullet = preload("res://scripts/bullet.gd")
+const Art = preload("res://scripts/art.gd")
 const KINDS := {
 	"ghoul": {"hp": 30, "speed": 52.0, "radius": 6.0, "gold": 1, "color": Color("c0392b")},
 	"archer": {"hp": 22, "speed": 42.0, "radius": 6.0, "gold": 1, "color": Color("d8c8a0")},
@@ -247,25 +248,18 @@ func _draw() -> void:
 		if int(_spawn_t * 16) % 2 == 0:
 			draw_arc(Vector2.ZERO, radius + 2, 0, TAU, 16, color, 1.0)
 		return
-	var c := Color.WHITE if _flash > 0 else color
+	var m := Color(4, 4, 4) if _flash > 0 else Color.WHITE
 	if _state in ["aim", "windup"] and int(_t * 20) % 2 == 0:
-		c = c.lightened(0.5)
-	if elite:
-		draw_arc(Vector2.ZERO, radius + 2, 0, TAU, 20, Color("f0c040"), 1.0)
-	if _burn_t > 0:
-		c = c.lerp(Color("ff8030"), 0.4)
+		m = Color(2, 2, 2)
+	elif _burn_t > 0:
+		m = Color(1.4, 0.8, 0.5)
 	elif _slow_t > 0:
-		c = c.lerp(Color("80c8ff"), 0.4)
-	var r := radius
-	match kind:
-		"archer", "cultist":
-			draw_colored_polygon(PackedVector2Array([Vector2(0, -r - 1), Vector2(r, 0), Vector2(0, r + 1), Vector2(-r, 0)]), c)
-		"bat":
-			draw_colored_polygon(PackedVector2Array([Vector2(-r - 3, -2), Vector2(0, r), Vector2(r + 3, -2), Vector2(0, 0)]), c)
-		"eye":
-			draw_circle(Vector2.ZERO, r, c)
-			draw_circle((target.position - position).limit_length(r * 0.4), r * 0.35, Color.BLACK)
-		"bloater", "slimelet":
-			draw_circle(Vector2.ZERO, r, c)
-		_:
-			draw_rect(Rect2(-r, -r, r * 2, r * 2), c)
+		m = Color(0.7, 0.9, 1.5)
+	if elite:
+		draw_arc(Vector2.ZERO, radius + 3, 0, TAU, 20, Color("f0c040"), 1.0)
+	var bob := Vector2(0, roundf(sin(_t * 8.0) * 0.6)) if kind != "eye" else Vector2(0, roundf(sin(_t * 3.0)))
+	draw_set_transform(bob)
+	var flip := target.position.x < position.x
+	if not Art.draw(self, kind, flip, m, 1.3 if elite else 1.0):
+		draw_circle(Vector2.ZERO, radius, color * m)
+	draw_set_transform(Vector2.ZERO)

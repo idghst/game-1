@@ -11,6 +11,7 @@ const Boss = preload("res://scripts/boss.gd")
 const Pickup = preload("res://scripts/pickup.gd")
 const Bullet = preload("res://scripts/bullet.gd")
 const Upgrades = preload("res://scripts/upgrades.gd")
+const Art = preload("res://scripts/art.gd")
 
 const W := 480.0
 const H := 270.0
@@ -20,11 +21,11 @@ const FLOORS := 9
 const BOSSES := {3: "warden", 6: "matron", 9: "king"}
 # 층 테마: 이름 키, 바닥·벽·문 색, 등장 적 가중치
 const THEMES := [
-	{"name": "THEME_CRYPT", "floor": Color("2a2430"), "wall": Color("120f16"), "accent": Color("5a4a6a"),
+	{"name": "THEME_CRYPT", "tile": "crypt", "floor": Color("2a2430"), "wall": Color("120f16"), "accent": Color("5a4a6a"), "ambient": Color(0.62, 0.58, 0.72),
 		"enemies": {"ghoul": 4, "archer": 3, "bat": 3, "bloater": 2}},
-	{"name": "THEME_CATACOMB", "floor": Color("1e2a2c"), "wall": Color("0c1214"), "accent": Color("2a6a6a"),
+	{"name": "THEME_CATACOMB", "tile": "catacomb", "floor": Color("1e2a2c"), "wall": Color("0c1214"), "accent": Color("2a6a6a"), "ambient": Color(0.5, 0.62, 0.66),
 		"enemies": {"ghoul": 2, "archer": 3, "bat": 2, "bloater": 2, "cultist": 3, "brute": 2}},
-	{"name": "THEME_SANCTUM", "floor": Color("2e1c1a"), "wall": Color("140a08"), "accent": Color("8a3a20"),
+	{"name": "THEME_SANCTUM", "tile": "sanctum", "floor": Color("2e1c1a"), "wall": Color("140a08"), "accent": Color("8a3a20"), "ambient": Color(0.66, 0.5, 0.46),
 		"enemies": {"ghoul": 1, "archer": 2, "bat": 2, "bloater": 1, "cultist": 3, "brute": 3, "eye": 2}},
 ]
 const PILLAR_LAYOUTS := [
@@ -52,6 +53,7 @@ var door_body: StaticBody2D
 var player: CharacterBody2D
 var boss: Node2D
 var camera := Camera2D.new()
+var darkness := CanvasModulate.new()
 var over := false
 
 # 통계(결과 화면·메타 재화·업적에 쓴다)
@@ -76,8 +78,24 @@ func _ready() -> void:
 	rng.randomize()
 	camera.position = Vector2(W, H) / 2
 	add_child(camera)
+	texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+	add_child(darkness)
 	player = Player.new()
 	add_child(player)
+	var light := PointLight2D.new()  # 플레이어 랜턴
+	var grad := GradientTexture2D.new()
+	grad.fill = GradientTexture2D.FILL_RADIAL
+	grad.fill_from = Vector2(0.5, 0.5)
+	grad.fill_to = Vector2(1.0, 0.5)
+	grad.width = 256
+	grad.height = 256
+	grad.gradient = Gradient.new()
+	grad.gradient.set_color(0, Color(1, 0.85, 0.6, 1))
+	grad.gradient.set_color(1, Color(1, 0.85, 0.6, 0))
+	light.texture = grad
+	light.texture_scale = 1.6
+	light.energy = 0.9
+	player.add_child(light)
 	player.hp_changed.connect(_on_hp_changed)
 	player.died.connect(_on_player_died)
 	_build_ui()
@@ -93,7 +111,7 @@ func _build_ui() -> void:
 	hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.draw.connect(_draw_hud)
 	ui.add_child(hud)
-	info_label = _label(Vector2(4, 9), HORIZONTAL_ALIGNMENT_LEFT)
+	info_label = _label(Vector2(13, 11), HORIZONTAL_ALIGNMENT_LEFT)
 	prompt_label = _label(Vector2(0, H - 30), HORIZONTAL_ALIGNMENT_CENTER)
 	toast_label = _label(Vector2(0, 52), HORIZONTAL_ALIGNMENT_CENTER)
 
@@ -133,6 +151,7 @@ func _new_floor() -> void:
 		if types[c] in ["combat", "gate"]:
 			pillars[c] = PILLAR_LAYOUTS[rng.randi() % PILLAR_LAYOUTS.size()]
 	stats.floor = floor_n
+	darkness.color = theme_data().ambient
 	_enter(Vector2i.ZERO, Vector2i.ZERO)
 	toast("%s %d\n%s" % [tr("FLOOR"), floor_n, tr(theme_data().name)], 2.5)
 
@@ -529,8 +548,16 @@ func _menu(title: String, options: Array, on_pick: Callable) -> void:
 # ── 그리기 ───────────────────────────────────────────────
 
 func _draw_hud() -> void:
+	var heart := Art.tex("heart")
 	for i in player.max_hp:
-		hud.draw_rect(Rect2(4 + i * 8, 3, 6, 6), Color("d63c3c") if i < player.hp else Color("40202a"))
+		var pos := Vector2(3 + i * 9, 2)
+		if heart:
+			hud.draw_texture(heart, pos, Color.WHITE if i < player.hp else Color(0.25, 0.15, 0.2))
+		else:
+			hud.draw_rect(Rect2(pos, Vector2(6, 6)), Color("d63c3c") if i < player.hp else Color("40202a"))
+	var coin := Art.tex("coin")
+	if coin:
+		hud.draw_texture(coin, Vector2(3, 15))
 	# 미니맵(우상단): 방문한 방과 그 이웃만 보인다
 	var lo := Vector2i.ZERO
 	var hi := Vector2i.ZERO
@@ -571,10 +598,37 @@ func _tag_color(tag: String) -> Color:
 
 func _draw() -> void:
 	var th := theme_data()
+	var floor_tex := Art.tex("floor_" + th.tile)
+	var wall_tex := Art.tex("wall_" + th.tile)
 	draw_rect(Rect2(0, 0, W, H), th.wall)
-	draw_rect(Rect2(WALL, WALL, W - 2 * WALL, H - 2 * WALL), th.floor)
+	if wall_tex:
+		draw_texture_rect(wall_tex, Rect2(0, 0, W, H), true)
+	if floor_tex:
+		draw_texture_rect(floor_tex, Rect2(WALL, WALL, W - 2 * WALL, H - 2 * WALL), true)
+	else:
+		draw_rect(Rect2(WALL, WALL, W - 2 * WALL, H - 2 * WALL), th.floor)
+	# 벽 안쪽 그림자 띠
+	draw_rect(Rect2(WALL, WALL, W - 2 * WALL, 4), Color(0, 0, 0, 0.35))
+	draw_rect(Rect2(WALL, WALL, 3, H - 2 * WALL), Color(0, 0, 0, 0.25))
 	for d in Dungeon.DIRS:
-		if cells.has(current + d):
-			draw_rect(_gap(d), Color("8a2a2a") if door_body else th.floor)
+		if not cells.has(current + d):
+			continue
+		var g := _gap(d)
+		if floor_tex:
+			draw_texture_rect(floor_tex, g, true)
+		else:
+			draw_rect(g, th.floor)
+		if door_body:  # 닫힌 문: 붉은 창살
+			draw_rect(g, Color(0.1, 0.02, 0.03, 0.75))
+			for i in range(2, int(maxf(g.size.x, g.size.y)), 6):
+				var a := g.position + (Vector2(i, 0) if g.size.x > g.size.y else Vector2(0, i))
+				var b := a + (Vector2(0, g.size.y) if g.size.x > g.size.y else Vector2(g.size.x, 0))
+				draw_line(a, b, Color("c03a3a"), 2.0)
 	for p in pillars.get(current, []):
-		draw_rect(Rect2(p - Vector2(8, 8), Vector2(16, 16)), th.accent)
+		var r := Rect2(p - Vector2(8, 8), Vector2(16, 16))
+		draw_rect(Rect2(r.position + Vector2(0, 3), r.size), Color(0, 0, 0, 0.4))
+		if wall_tex:
+			draw_texture_rect(wall_tex, r, true, Color(1.4, 1.4, 1.4))
+		else:
+			draw_rect(r, th.accent)
+		draw_rect(Rect2(r.position, Vector2(16, 2)), Color(1, 1, 1, 0.15))

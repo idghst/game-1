@@ -1,1 +1,5 @@
 .godot/
+tools/forge/target/
+addons/godotsteam/
+steam/out/
+build/
