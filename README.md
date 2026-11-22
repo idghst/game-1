@@ -16,6 +16,20 @@
 
 배포 빌드 스모크는 누구나 돌릴 수 있습니다: `HollowVigil.exe --headless --fixed-fps 60 -- --smoke`, 실제 창은 `-- --smoke-render`(결과: 사용자 데이터 폴더의 `smoke_result.txt`).
 
+## Windows에 설치하기
+
+1. [Releases](https://github.com/idghst/game-1/releases)에서 `HollowVigil-Setup-<버전>.exe`를 받아 실행합니다. 같은 곳의 `SHA256SUMS.txt`로 파일을 확인할 수 있습니다.
+2. 코드 서명이 없어서 **"Windows의 PC 보호"(SmartScreen) 창**이 뜰 수 있습니다. **추가 정보 → 실행**을 누르면 설치가 계속됩니다.
+3. 관리자 권한 없이 내 계정(`%LOCALAPPDATA%\Programs\Hollow Vigil`)에 설치되고, 시작 메뉴에 바로가기가 생깁니다. 바탕화면 바로가기는 설치 중에 고를 수 있습니다.
+4. 지우려면 Windows **설정 → 앱 → 설치된 앱**에서 Hollow Vigil을 제거합니다. 저장 파일(`%APPDATA%\Godot\app_userdata\Hollow Vigil`)은 지워지지 않으니, 완전히 지우려면 이 폴더도 직접 삭제하세요.
+
+설치하지 않고 쓰려면 `HollowVigil-<버전>-windows.zip`을 풀고 `HollowVigil.exe`를 실행합니다.
+
+### 릴리스 만들기(관리자)
+`project.godot`의 `config/version`을 올리고 머지한 뒤, 같은 버전의 태그(`v0.9.0` 형식)를 푸시하면 `.github/workflows/release.yml`이
+테스트·실기 검증을 다시 돌리고 설치 파일·zip·체크섬을 GitHub Release로 올립니다. 설치 파일만 로컬에서 만들려면 Windows에서
+`forge build windows` 후 `ISCC /DAppVersion=<버전> installer\HollowVigil.iss`(Inno Setup 6).
+
 ## 실행
 
 ```sh

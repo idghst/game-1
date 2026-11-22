@@ -1,0 +1,54 @@
+name: release
+
+# v* 태그(예: v0.9.0)를 푸시하면 build.yml 전체(테스트·내보내기·Windows/macOS 실기 스모크·설치 파일 검증)를 돌린 뒤
+# Windows 설치 파일, Windows 무설치 zip, macOS zip과 SHA-256 체크섬을 GitHub Release로 올린다.
+# 태그 이름은 project.godot의 config/version과 같아야 한다.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 태그와 project.godot 버전 확인
+        run: |
+          VER=$(sed -n 's/^config\/version="\(.*\)"/\1/p' project.godot)
+          if [ "v$VER" != "$GITHUB_REF_NAME" ]; then echo "태그 $GITHUB_REF_NAME 와 project.godot 버전 $VER 이 다릅니다"; exit 1; fi
+          echo "VER=$VER" >> "$GITHUB_ENV"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: HollowVigil-windows
+          path: win
+      - uses: actions/download-artifact@v4
+        with:
+          name: HollowVigil-macos
+          path: mac
+      - uses: actions/download-artifact@v4
+        with:
+          name: HollowVigil-installer
+          path: inst
+
+      - name: 릴리스 파일·체크섬
+        run: |
+          mkdir dist
+          cp "inst/HollowVigil-Setup-$VER.exe" dist/
+          (cd win && zip -qr "../dist/HollowVigil-$VER-windows.zip" .)
+          cp mac/HollowVigil.zip "dist/HollowVigil-$VER-macos.zip"
+          (cd dist && sha256sum * > SHA256SUMS.txt && cat SHA256SUMS.txt)
+          sed "s/{{VERSION}}/$VER/g" .github/release-notes.md > notes.md
+
+      - name: GitHub Release 만들기
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --title "Hollow Vigil $VER" --notes-file notes.md
