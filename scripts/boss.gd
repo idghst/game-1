@@ -8,9 +8,9 @@ const Art = preload("res://scripts/art.gd")
 const KINDS := {
 	"warden": {"hp": 600, "radius": 14.0, "speed": 40.0, "color": Color("d8d0b8"),
 		"patterns": [["ring", "charge", "fan", "summon"], ["ring", "charge", "fan", "summon", "charge"]]},
-	"matron": {"hp": 1400, "radius": 13.0, "speed": 45.0, "color": Color("4ab0a0"),
+	"matron": {"hp": 2400, "radius": 13.0, "speed": 45.0, "color": Color("4ab0a0"),
 		"patterns": [["spiral", "teleport", "fan", "summon"], ["spiral", "teleport", "ring", "summon", "fan"]]},
-	"king": {"hp": 2600, "radius": 15.0, "speed": 50.0, "color": Color("f06030"),
+	"king": {"hp": 5200, "radius": 15.0, "speed": 50.0, "color": Color("f06030"),
 		"patterns": [["ring", "fan", "charge"], ["spiral", "ring", "summon", "fan", "charge"], ["rain", "spiral", "charge", "ring", "summon", "rain"]]},
 }
 
@@ -76,7 +76,7 @@ func _next() -> void:
 func _shoot(dir: Vector2, spd: float, big := false) -> void:
 	Sfx.play("enemy_shoot", -12.0, randf_range(0.8, 1.0))
 	var opts := {"radius": 3.5} if big else {}
-	get_parent().add_child.call_deferred(Bullet.new().setup(position + dir * (radius + 2), dir * spd, 1, false, opts))
+	game.spawn.call_deferred(Bullet.new().setup(position + dir * (radius + 2), dir * spd, 1, false, opts), get_parent())
 
 
 func _ring(n: int, spd: float, offset := 0.0, big := false) -> void:
@@ -165,7 +165,7 @@ func _physics_process(delta: float) -> void:
 					var gap := randi_range(2, 17)
 					for i in 20:
 						if absi(i - gap) > 1:
-							get_parent().add_child.call_deferred(Bullet.new().setup(Vector2(24 + i * 23, 20), Vector2(0, 85), 1, false))
+							game.spawn.call_deferred(Bullet.new().setup(Vector2(24 + i * 23, 20), Vector2(0, 85), 1, false), get_parent())
 					_fired += 1
 				if _pt > 3.6:
 					_next()

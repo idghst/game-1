@@ -18,6 +18,7 @@ var shake := true
 var locale := ""  # 비어 있으면 OS 언어
 var bindings := {}  # action -> {"kb": 이벤트 사전, "pad": 이벤트 사전}
 var _theme: Theme
+var _applied_display := []
 var _defaults := {}
 
 
@@ -90,7 +91,9 @@ func apply() -> void:
 			AudioServer.set_bus_volume_db(i, linear_to_db(maxf(bus[1], 0.0001)))
 	Fx.shake_enabled = shake
 	TranslationServer.set_locale(locale if locale != "" else OS.get_locale_language())
-	if DisplayServer.get_name() != "headless":
+	# 창은 화면 설정이 바뀔 때만 건드린다(음량 슬라이더를 움직일 때마다 창이 가운데로 튀지 않게)
+	if DisplayServer.get_name() != "headless" and _applied_display != [fullscreen, scale]:
+		_applied_display = [fullscreen, scale]
 		if fullscreen:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 		else:

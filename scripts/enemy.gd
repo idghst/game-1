@@ -27,6 +27,7 @@ var color := Color.RED
 var target: Node2D
 var game: Node  # main.gd: 분열·소환 요청용
 var bullet_speed_mult := 1.0
+var fire_rate_mult := 1.0  # 층이 깊을수록 더 자주 쏜다
 var _spawn_t := 0.5  # 등장 연출 중에는 행동·피격 없음
 var _t := 0.0  # 범용 타이머
 var _cd := 1.0  # 공격 쿨다운
@@ -69,13 +70,13 @@ func _ready() -> void:
 
 
 func _cool(base: float) -> float:
-	return base * (0.7 if elite else 1.0)
+	return base * (0.7 if elite else 1.0) / fire_rate_mult
 
 
 func _shoot(dir: Vector2, spd: float, big := false) -> void:
 	Sfx.play("enemy_shoot", -14.0, randf_range(0.9, 1.1))
 	var opts := {"radius": 3.5} if big else {}
-	get_parent().add_child.call_deferred(Bullet.new().setup(position + dir * (radius + 2), dir * spd * bullet_speed_mult, 1, false, opts))
+	game.spawn.call_deferred(Bullet.new().setup(position + dir * (radius + 2), dir * spd * bullet_speed_mult, 1, false, opts), get_parent())
 
 
 func _ring(n: int, spd: float, offset := 0.0) -> void:

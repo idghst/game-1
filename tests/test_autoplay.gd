@@ -59,10 +59,10 @@ func _process(_delta: float) -> bool:
 		_last_floor = main.floor_n
 	if main.over or run_frames > 60 * 60 * 40:  # 게임 시간 40분이 넘으면 멈춘 것으로 본다
 		if not main.over:
-			printerr("FAIL: run stuck on floor %d room %s" % [main.floor_n, main.current])
-			printerr("  type=%s alive=%d waves=%d player=%s paused=%s enemies=%s" % [main.types[main.current], main.alive, main.waves_left, main.player.position, paused,
+			print("FAIL: run stuck on floor %d room %s" % [main.floor_n, main.current])
+			print("  type=%s alive=%d waves=%d player=%s paused=%s enemies=%s" % [main.types[main.current], main.alive, main.waves_left, main.player.position, paused,
 				get_nodes_in_group("enemies").map(func(e: Node) -> String: return "%s@%s" % [e.kind, e.position])])
-			printerr("  cleared=%s pickups=%s pillars=%s" % [main.cleared.has(main.current), get_nodes_in_group("pickups").map(func(k: Node) -> String: return "%s@%s" % [k.kind, k.position]), main.pillars.get(main.current, [])])
+			print("  cleared=%s pickups=%s pillars=%s" % [main.cleared.has(main.current), get_nodes_in_group("pickups").map(func(k: Node) -> String: return "%s@%s" % [k.kind, k.position]), main.pillars.get(main.current, [])])
 			results.append({"victory": false, "floor": main.floor_n, "stuck": true})
 		main.queue_free()
 		_last_floor = 1

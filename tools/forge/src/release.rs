@@ -98,6 +98,7 @@ pub fn test(root: &Path, long: bool) {
         vec!["tests/test_i18n.gd"],
         vec!["tests/test_save.gd"],
         vec!["tests/test_flow.gd"],
+        vec!["tests/test_gamepad.gd"],
         vec!["tests/test_autoplay.gd", "--", n],
         vec!["tests/test_balance.gd", "--", n],
     ];
@@ -114,8 +115,8 @@ pub fn test(root: &Path, long: bool) {
         for line in text.lines().filter(|l| l.contains("self-test") || l.contains("FAIL") || l.contains("SCRIPT ERROR") || l.starts_with("run ") || l.starts_with("skill ") || l.starts_with("autoplay")) {
             println!("  {line}");
         }
-        // 종료 코드뿐 아니라 스크립트 런타임 에러도 실패로 본다
-        if !out.status.success() || text.contains("SCRIPT ERROR") {
+        // 종료 코드뿐 아니라 스크립트 런타임 에러와 물리 콜백 중 상태 변경 에러도 실패로 본다
+        if !out.status.success() || text.contains("SCRIPT ERROR") || text.contains("flushing queries") {
             failed.push(t[0].to_string());
         }
     }

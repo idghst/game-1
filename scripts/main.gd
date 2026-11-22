@@ -158,7 +158,7 @@ func toast(text: String, seconds := 2.0) -> void:
 # ── 층과 방 ──────────────────────────────────────────────
 
 func _new_floor() -> void:
-	cells = Dungeon.generate(rng, 6 + floori(floor_n / 2.0))
+	cells = Dungeon.generate(rng, 6 + floori(floor_n / 3.0))  # 6~9개: 한 판 15~25분
 	types = Dungeon.assign_types(rng, cells, BOSSES.has(floor_n))
 	cleared = {Vector2i.ZERO: true}
 	visited = {}
@@ -218,7 +218,7 @@ func _enter(cell: Vector2i, moved: Vector2i) -> void:
 	else:
 		match t:
 			"combat":
-				waves_left = 2 if floor_n >= 2 and rng.randf() < 0.55 + floor_n * 0.04 else 1
+				waves_left = 2 if floor_n >= 2 and rng.randf() < 0.4 + floor_n * 0.03 else 1
 				_spawn_wave(false)
 			"gate":
 				waves_left = 2
@@ -266,23 +266,32 @@ func _add_rect(body: StaticBody2D, r: Rect2) -> void:
 	body.add_child(shape)
 
 
-func _add_pickup(p: Area2D) -> void:
+func _add_pickup(p: Area2D, into: Node = null) -> void:
 	p.taken.connect(_on_pickup_taken)
-	room.add_child(p)
+	spawn(p, into if into else room)
+
+
+# 물리 콜백(피격·사망) 안에서 만든 Area2D는 바로 넣을 수 없어 call_deferred로 여기를 부른다.
+# 그 사이 방이 바뀌었으면 버린다(바뀐 방에 끼어들거나 고아 노드로 남지 않게).
+func spawn(node: Node, into: Node) -> void:
+	if into == room and is_instance_valid(into) and not into.is_queued_for_deletion():
+		into.add_child(node)
+	else:
+		node.free()
 
 
 # ── 적 ───────────────────────────────────────────────────
 
 func hp_mult() -> float:
-	return 1.0 + 0.22 * (floor_n - 1)
+	return pow(1.3, floor_n - 1)  # 업그레이드가 쌓이는 속도를 따라가도록 지수로
 
 
 func _spawn_wave(elite_lead: bool) -> void:
 	waves_left -= 1
-	var count := 2 + floori(floor_n * 0.7) + rng.randi_range(0, 2)
+	var count := 2 + floori(floor_n * 0.8) + rng.randi_range(0, 2)
 	var weights: Dictionary = theme_data().enemies
 	for i in count:
-		var elite := (elite_lead and i == 0) or rng.randf() < 0.03 + floor_n * 0.03
+		var elite := (elite_lead and i == 0) or rng.randf() < 0.02 + floor_n * 0.04
 		spawn_enemy(_weighted(weights), _free_spot(), elite, false)
 
 
@@ -314,6 +323,7 @@ func spawn_enemy(kind: String, pos: Vector2, elite: bool, summoned: bool) -> voi
 	var e: CharacterBody2D = Enemy.new().setup(kind, elite, player, self, hp_mult())
 	e.position = pos.clamp(Vector2(WALL + 8, WALL + 8), Vector2(W - WALL - 8, H - WALL - 8))
 	e.bullet_speed_mult = 1.0 + 0.05 * (floor_n - 1)
+	e.fire_rate_mult = 1.0 + 0.07 * (floor_n - 1)
 	if summoned:
 		e._spawn_t = 0.35
 	e.died.connect(_on_enemy_died)
@@ -333,9 +343,9 @@ func _on_enemy_died(e: Node, rewards: bool) -> void:
 		for i in e.gold:
 			if rng.randf() < 0.65:
 				continue
-			_add_pickup.call_deferred(Pickup.new().setup("coin", e.position + Vector2(rng.randf_range(-6, 6), rng.randf_range(-6, 6)), player))
+			_add_pickup.call_deferred(Pickup.new().setup("coin", e.position + Vector2(rng.randf_range(-6, 6), rng.randf_range(-6, 6)), player), room)
 		if rng.randf() < 0.03:
-			_add_pickup.call_deferred(Pickup.new().setup("heart", e.position, player))
+			_add_pickup.call_deferred(Pickup.new().setup("heart", e.position, player), room)
 		if player.dash_reset_on_kill:
 			player.reset_dash()
 		if player.lifesteal_every > 0:
@@ -345,8 +355,8 @@ func _on_enemy_died(e: Node, rewards: bool) -> void:
 				player.heal(1)
 		if player.souls:
 			var dir := Vector2.RIGHT.rotated(rng.randf() * TAU)
-			room.add_child.call_deferred(Bullet.new().setup(e.position, dir * 150, player.damage, true,
-				{"homing": 8.0, "color": Color("a0f0ff"), "life": 1.5}))
+			spawn.call_deferred(Bullet.new().setup(e.position, dir * 150, player.damage, true,
+				{"homing": 8.0, "color": Color("a0f0ff"), "life": 1.5}), room)
 	if e == boss:
 		stats.bosses += 1
 		_achieve(e.kind)
@@ -379,14 +389,14 @@ func _clear_room(reward: bool) -> void:
 	stats.rooms += 1
 	var t: String = types[current]
 	if t == "combat" and rng.randf() < 0.2:
-		_add_pickup.call_deferred(Pickup.new().setup("heart", Vector2(W, H) / 2, player))
+		_add_pickup.call_deferred(Pickup.new().setup("heart", Vector2(W, H) / 2, player), room)
 	if t == "boss" and floor_n == FLOORS:
 		_finish(true)
 		return
 	if t in ["gate", "boss"]:
 		if t == "boss":
 			player.heal(2)
-		_add_pickup.call_deferred(Pickup.new().setup("stairs", Vector2(W, H) / 2, player))
+		_add_pickup.call_deferred(Pickup.new().setup("stairs", Vector2(W, H) / 2, player), room)
 		_offer_upgrades(1.5 if t == "boss" else 0.3)
 
 
