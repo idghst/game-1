@@ -21,7 +21,7 @@ Steam API 이름은 ID를 대문자로 바꾼 것입니다(`steam/README.md`).
 | `legendary` (LEGENDARY) | Relic Seeker / 유물 사냥꾼 | 전설 축복 획득 | 보라 보석 박힌 황금 유물 | `legendary.png`, `legendary_locked.png` |
 | `hoarder` (HOARDER) | Hoarder / 수집가 | 금화 150개를 한 번에 보유 | 주머니에서 쏟아지는 금화 | `hoarder.png`, `hoarder_locked.png` |
 | `slayer` (SLAYER) | Slayer / 학살자 | 누적 1000마리 처치 | 해골 더미와 검 | `slayer.png`, `slayer_locked.png` |
-| `elite_hunter` (ELITE_HUNTER) | Elite Hunter / 엘리트 사냥꾼 | 누적 엘리트 50마리 처치 | 붉은 깃 쇠뇌 화살이 박힌 뿔 달린 해골 | `elite_hunter.png`, `elite_hunter_locked.png` |
+| `elite_hunter` (ELITE_HUNTER) | Elite Hunter / 엘리트 사냥꾼 | 누적 엘리트 50마리 처치 | 화살이 대각선으로 꿰뚫은 뿔 달린 뼈색 해골(붉은 눈) | `elite_hunter.png`, `elite_hunter_locked.png` |
 | `swift_vigil` (SWIFT_VIGIL) | Swift Vigil / 재빠른 불침번 | 18분 안에 승리 | 불꽃 얹힌 모래시계 | `swift_vigil.png`, `swift_vigil_locked.png` |
 | `devoted` (DEVOTED) | Devoted / 헌신 | 잿불 제단 강화 합계 5단계 | 잿불이 타는 돌 제단 | `devoted.png`, `devoted_locked.png` |
 | `dasher` (DASHER) | Restless / 쉴 새 없이 | 누적 대시 500회 | 뒤꿈치에서 속도선이 뻗는 날개 달린 가죽 장화 | `dasher.png`, `dasher_locked.png` |

@@ -39,7 +39,7 @@ ach_synergy | badge | 64x64 | green | two interlocked glowing magic rings, one c
 ach_legendary | badge | 64x64 | green | an ornate golden relic amulet with a large glowing purple gem, radiant light rays
 ach_hoarder | badge | 64x64 | magenta | a heap of shiny gold coins spilling from an open leather coin pouch
 ach_slayer | badge | 64x64 | green | a pile of many bone white skulls with a bloodied sword stuck on top
-ach_elite_hunter | badge | 64x64 | green | a large horned demon skull with glowing red eyes, a thick wooden crossbow bolt with big red feather fletching stuck deep into the cracked forehead
+ach_elite_hunter | badge | 64x64 | green | a large bone white horned demon skull seen from the front with glowing red eyes filling most of the frame, one short very thick pale wooden arrow with red fletching stuck diagonally through the skull from upper left to lower right, the big steel arrowhead sticking out the other side, cracks around the hole
 ach_swift_vigil | badge | 64x64 | magenta | a brass hourglass with glowing amber sand and a small flame on top
 ach_devoted | badge | 64x64 | green | a small stone altar with a bright orange ember flame burning on top
 ach_dasher | badge | 64x64 | magenta | a single large brown leather boot seen from the side with big white feathered wings on the heel, three bold thick solid white speed lines attached to the back of the heel and extending far behind it
