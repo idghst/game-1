@@ -68,6 +68,18 @@ func _process(_d: float) -> bool:
 	check(settings.event_for("dash", "kb").physical_keycode == KEY_F, "rebind applies to InputMap")
 	settings.reset_bindings()
 	check(settings.event_for("dash", "kb").physical_keycode == KEY_SPACE, "reset restores default binding")
+	# 6) 업적: 해금이 프로필에 남고, 누적 통계 업적이 조건대로 열린다
+	var ach: Node = root.get_node("Achievements")
+	profile.data = profile.defaults()
+	ach.unlock("synergy")
+	ach.unlock("synergy")
+	check(profile.data.achievements == ["synergy"], "unlock is recorded once")
+	profile.data.totals.kills = 1000
+	profile.data.totals.runs = 10
+	ach.check_totals()
+	check(ach.has("first_blood") and ach.has("slayer") and ach.has("persistent") and not ach.has("elite_hunter"), "total-based achievements")
+	check(profile.load_from(p).achievements.has("slayer"), "achievements saved to profile")
+	check(not root.get_node("SteamService").active, "steam stays inactive in headless runs")
 	for f in [p, p + ".bad", settings.path]:
 		DirAccess.remove_absolute(f)
 	print("save self-test: %d failures" % fails)

@@ -73,6 +73,7 @@ var tag_count := {}
 var synergies: Array = []
 var _gold_frac := 0.0
 var _kills_since_heal := 0
+var _hits_at_floor_start := 0
 
 var ui: CanvasLayer
 var hud: Control
@@ -110,6 +111,11 @@ func _ready() -> void:
 	_build_ui()
 	if use_meta:
 		Meta.apply(Profile.data.meta, player, self)
+		Achievements.session_new.clear()
+		Achievements.unlocked.connect(_on_achievement)
+	SteamService.overlay_toggled.connect(func(on: bool) -> void:
+		if on:
+			open_pause())
 	_new_floor()
 	Sfx.music("music_dungeon")
 
@@ -321,6 +327,7 @@ func _on_enemy_died(e: Node, rewards: bool) -> void:
 		return
 	if not over:
 		stats.kills += 1
+		_achieve("first_blood")
 		if e.elite:
 			stats.elites += 1
 		for i in e.gold:
@@ -342,6 +349,7 @@ func _on_enemy_died(e: Node, rewards: bool) -> void:
 				{"homing": 8.0, "color": Color("a0f0ff"), "life": 1.5}))
 	if e == boss:
 		stats.bosses += 1
+		_achieve(e.kind)
 		for other in get_tree().get_nodes_in_group("enemies"):
 			other.die(false)
 		alive = 0
@@ -407,6 +415,8 @@ func _on_pickup_taken(p: Area2D) -> void:
 			_gold_frac -= n
 			gold += n
 			stats.gold += n
+			if gold >= 150:
+				_achieve("hoarder")
 			Sfx.play("coin", -6.0, randf_range(0.95, 1.1))
 			Fx.burst(room, p.position, Color("f0c040"), 4, 30.0, 0.2)
 		"heart":
@@ -434,6 +444,9 @@ func _on_pickup_taken(p: Area2D) -> void:
 				_take_upgrade(p.item)
 			Fx.burst(room, p.position, Color("b080e0"), 16, 70.0)
 		"stairs":
+			if player.hits_taken == _hits_at_floor_start:
+				_achieve("untouched")
+			_hits_at_floor_start = player.hits_taken
 			Sfx.play("stairs")
 			floor_n += 1
 			_new_floor()
@@ -465,10 +478,13 @@ func _take_upgrade(id: String) -> void:
 	Sfx.play("upgrade")
 	owned.append(id)
 	Upgrades.apply(id, player)
+	if Upgrades.ALL[id].rarity == "legendary":
+		_achieve("legendary")
 	var tag: String = Upgrades.ALL[id].tag
 	tag_count[tag] = tag_count.get(tag, 0) + 1
 	if tag_count[tag] >= Upgrades.SYNERGY_COUNT and not synergies.has(tag):
 		synergies.append(tag)
+		_achieve("synergy")
 		Upgrades.apply_synergy(tag, player)
 		toast("%s: %s" % [tr("SYNERGY"), tr("SYN_" + tag.to_upper())], 2.5)
 		Fx.burst(room, player.position, Upgrades.RARITY_COLOR.legendary, 30, 120.0, 0.6)
@@ -540,6 +556,16 @@ func open_pause() -> void:
 		_finish(false))
 
 
+# 업적은 실제 판(use_meta)에서만 기록한다
+func _achieve(id: String) -> void:
+	if use_meta:
+		Achievements.unlock(id)
+
+
+func _on_achievement(id: String) -> void:
+	toast("%s: %s" % [tr("ACHIEVEMENT_UNLOCKED"), tr("ACH_" + id.to_upper())], 2.5)
+
+
 func _on_hp_changed() -> void:
 	hud.queue_redraw()
 
@@ -567,13 +593,19 @@ func _finish(victory: bool) -> void:
 	if victory:
 		Sfx.play("victory")
 	var embers := Profile.record_run(stats, victory, player.dash_count) if use_meta else 0
+	if use_meta:
+		if victory and player.hits_taken == _hits_at_floor_start:
+			_achieve("untouched")
+		if victory and stats.time < 18 * 60:
+			_achieve("swift_vigil")
+		Achievements.check_totals()
 	run_finished.emit(victory)
 	# 쓰러지는 연출을 잠깐 보여 준 뒤 결과 화면
 	await get_tree().create_timer(2.0 if victory else 1.2, true, false, true).timeout
 	if not is_inside_tree():
 		return
 	get_tree().paused = true
-	ui.add_child(Results.new().setup(stats, victory, embers, owned, []))
+	ui.add_child(Results.new().setup(stats, victory, embers, owned, Achievements.session_new if use_meta else []))
 
 
 # 제목 + 버튼 목록을 띄우고 게임을 멈춘다. 버튼을 누르면 메뉴를 닫고 on_pick(인덱스)를 부른다.

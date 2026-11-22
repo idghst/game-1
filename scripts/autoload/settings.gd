@@ -25,6 +25,8 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	for a in REBINDABLE:
 		_defaults[a] = {"kb": _slot_event(a, "kb"), "pad": _slot_event(a, "pad")}
+	if not FileAccess.file_exists(path) and SteamService.on_deck:
+		fullscreen = true  # Steam Deck 첫 실행은 전체 화면
 	load_settings()
 	apply()
 	_theme = UiTheme.build()

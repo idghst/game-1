@@ -14,6 +14,13 @@ var data := {}
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	data = load_from(path)
+	# Steam Cloud에 더 최근 저장이 있으면 그것을 쓴다(다른 PC에서 이어 하기)
+	var cloud := SteamService.cloud_read("profile.json")
+	if not cloud.is_empty():
+		var raw = JSON.parse_string(cloud.get_string_from_utf8())
+		if raw is Dictionary and int(raw.get("saved_at", 0)) > int(data.saved_at):
+			data = sanitize(raw)
+			print("profile: Steam Cloud 저장을 불러왔습니다")
 
 
 static func defaults() -> Dictionary:
@@ -74,6 +81,8 @@ func save() -> void:
 	f.close()
 	DirAccess.remove_absolute(path)
 	DirAccess.rename_absolute(tmp, path)
+	if path == PATH:  # 테스트용 경로는 올리지 않는다
+		SteamService.cloud_write("profile.json", text.to_utf8_buffer())
 	saved.emit()
 
 

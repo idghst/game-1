@@ -81,6 +81,7 @@ func _buy(id: String) -> void:
 	Profile.data.meta[id] = lv + 1
 	Profile.save()
 	Sfx.play("upgrade")
+	Achievements.check_meta()
 	_build(id)
 
 
