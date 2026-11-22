@@ -15,6 +15,7 @@ const Art = preload("res://scripts/art.gd")
 const PauseMenu = preload("res://scripts/ui/pause_menu.gd")
 const Results = preload("res://scripts/ui/results.gd")
 const Meta = preload("res://scripts/meta.gd")
+const Menu = preload("res://scripts/ui/menu.gd")
 
 const W := 480.0
 const H := 270.0
@@ -327,8 +328,16 @@ func spawn_enemy(kind: String, pos: Vector2, elite: bool, summoned: bool) -> voi
 	if summoned:
 		e._spawn_t = 0.35
 	e.died.connect(_on_enemy_died)
-	room.add_child.call_deferred(e)
+	_add_enemy.call_deferred(e, room)
 	alive += 1
+
+
+# 보스가 죽은 그 프레임에 소환된 적처럼, 들어가기 전에 방이 클리어되거나 바뀌었으면 버린다
+func _add_enemy(e: Node, into: Node) -> void:
+	if cleared.has(current) or into != room or not is_instance_valid(into):
+		e.free()
+	else:
+		into.add_child(e)
 
 
 func _on_enemy_died(e: Node, rewards: bool) -> void:
@@ -621,16 +630,11 @@ func _finish(victory: bool) -> void:
 # 제목 + 버튼 목록을 띄우고 게임을 멈춘다. 버튼을 누르면 메뉴를 닫고 on_pick(인덱스)를 부른다.
 func _menu(title: String, options: Array, on_pick: Callable) -> void:
 	_menu_open = true
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	var panel := PanelContainer.new()
-	var box := VBoxContainer.new()
-	center.add_child(panel)
-	panel.add_child(box)
-	var t := Label.new()
-	t.text = title
-	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	box.add_child(t)
+	var root := Control.new()
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.set_meta("menu", true)
+	ui.add_child(root)
+	var box := Menu.panel(root, title, 260)
 	for i in options.size():
 		var b := Button.new()
 		b.text = options[i].text
@@ -639,14 +643,13 @@ func _menu(title: String, options: Array, on_pick: Callable) -> void:
 			b.add_theme_color_override("font_color", options[i].color)
 			b.add_theme_color_override("font_focus_color", options[i].color.lightened(0.4))
 		b.pressed.connect(func() -> void:
-			center.queue_free()
+			root.queue_free()
 			_menu_open = false
 			get_tree().paused = false
 			on_pick.call(i))
 		box.add_child(b)
-	ui.add_child(center)
-	box.get_child(1).grab_focus.call_deferred()
 	get_tree().paused = true
+	Menu.guard(root)
 
 
 # ── 그리기 ───────────────────────────────────────────────

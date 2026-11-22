@@ -32,10 +32,10 @@ func _ending(next: Callable) -> void:
 	ending.custom_minimum_size.x = 320
 	ending.add_theme_color_override("font_color", Color("dcb88c"))
 	box.add_child(ending)
-	var b := Menu.button(box, tr("CONTINUE"), func() -> void:
+	Menu.button(box, tr("CONTINUE"), func() -> void:
 		page.queue_free()
 		next.call())
-	b.grab_focus.call_deferred()
+	Menu.guard.call_deferred(page)  # setup은 트리에 붙기 전에 불린다
 
 
 func _stats(stats: Dictionary, victory: bool, embers: int, owned: Array, new_achievements: Array) -> void:
@@ -89,4 +89,4 @@ func _stats(stats: Dictionary, victory: bool, embers: int, owned: Array, new_ach
 	Menu.button(row, tr("TO_TITLE"), func() -> void:
 		get_tree().paused = false
 		get_tree().change_scene_to_file("res://title.tscn"))
-	again.grab_focus.call_deferred()
+	Menu.guard.call_deferred(self)

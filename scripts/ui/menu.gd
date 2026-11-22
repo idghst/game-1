@@ -43,6 +43,21 @@ static func button(box: Container, text: String, on_press: Callable) -> Button:
 	return b
 
 
+# 메뉴가 뜬 직후 잠깐 버튼을 막는다: 전투 중 누르던 Space(대시=확인)나 마우스 연사가
+# 뜨자마자 첫 버튼을 눌러 버리지 않게. 막힌 동안에도 포커스는 첫 버튼에 둔다.
+static func guard(root: Node, seconds := 0.35) -> void:
+	var buttons := root.find_children("*", "BaseButton", true, false)
+	for b in buttons:
+		b.disabled = true
+	await root.get_tree().create_timer(seconds, true, false, true).timeout
+	if not is_instance_valid(root):
+		return
+	for b in buttons:
+		if is_instance_valid(b):
+			b.disabled = false
+	focus_first(root)
+
+
 static func focus_first(box: Node) -> void:
 	for c in box.find_children("*", "", true, false):
 		if c is Control and c.focus_mode == Control.FOCUS_ALL and c.visible and not (c is BaseButton and c.disabled):

@@ -48,7 +48,7 @@ func _process(delta: float) -> bool:
 	if paused:
 		paused = false  # 축복 선택 메뉴가 떠도 계속 측정
 		for m in main.ui.get_children():
-			if m is CenterContainer:
+			if m.has_meta("menu"):
 				m.queue_free()
 		main._menu_open = false
 	if t > SECONDS:
