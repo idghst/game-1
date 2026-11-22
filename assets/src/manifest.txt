@@ -1,0 +1,31 @@
+# 에셋 목록: 이름 | 종류(sprite/tile/bg) | 출력 크기(WxH) | 배경 키(magenta/green/none) | 프롬프트
+# sprite: 배경을 지우고 잘라 내 팔레트·외곽선 처리. tile: 꽉 찬 텍스처. bg: 화면 크기 배경.
+player | sprite | 18x18 | magenta | a hooded dark fantasy gunslinger hunter holding a lantern pistol, bone white cloak and amber lantern glow
+ghoul | sprite | 16x16 | magenta | a hunched rotting ghoul with long claws, pale grey flesh and glowing red eyes
+archer | sprite | 16x16 | magenta | a skeleton archer holding a bone bow, cracked yellowed bones and a tattered brown hood
+bat | sprite | 16x14 | green | a giant purple cave bat with spread wings and red eyes, seen from above
+bloater | sprite | 22x22 | magenta | a bloated swollen green plague corpse blob monster covered in pustules
+slimelet | sprite | 10x10 | magenta | a tiny round green slime blob with two small eyes
+cultist | sprite | 16x16 | green | a robed purple cultist mage holding a glowing violet orb, hood covering the face
+brute | sprite | 24x24 | magenta | a massive horned brute ogre with rusty armor plates and a huge wooden club, brown leather
+eye | sprite | 18x18 | green | a floating giant bloodshot eyeball demon with small tentacles, crimson flesh
+warden | sprite | 40x40 | magenta | a huge skeletal knight warden made of bones wearing a bone crown and a tattered banner, holding a giant bone mace, boss monster
+matron | sprite | 40x40 | magenta | a drowned ghostly nun matron floating above water, teal water-soaked robes, seaweed hair, glowing cyan eyes, boss monster
+king | sprite | 44x44 | green | the ashen king, a towering burning undead monarch with a crown of embers, charcoal black armor with glowing orange cracks and a flaming cape, boss monster
+coin | sprite | 8x8 | magenta | a single shiny gold coin with a small skull emblem
+heart | sprite | 10x10 | green | a glowing red crystal heart gem
+chest | sprite | 18x16 | magenta | a closed wooden treasure chest with gold trims and an iron lock
+stairs | sprite | 26x26 | magenta | a square stone stairway hole in the floor descending into darkness, top-down view
+icon_might | sprite | 12x12 | magenta | a steel broadsword item icon with a red gem in the hilt
+icon_swift | sprite | 12x12 | magenta | a teal winged boot item icon
+icon_arcane | sprite | 12x12 | magenta | a glowing blue arcane rune orb item icon
+icon_blood | sprite | 12x12 | green | a crimson blood drop item icon
+bullet_player | sprite | 6x6 | magenta | a small glowing golden fireball orb projectile
+bullet_enemy | sprite | 7x7 | green | a small glowing pink-red cursed magic orb projectile
+floor_crypt | tile | 32x32 | none | seamless tileable top-down pixel art dungeon floor texture of dark purple-grey stone flagstones, no objects
+wall_crypt | tile | 32x32 | none | seamless tileable pixel art texture of very dark grey-purple crypt bricks, top-down
+floor_catacomb | tile | 32x32 | none | seamless tileable top-down pixel art dungeon floor texture of wet dark teal stone tiles with small puddles, no objects
+wall_catacomb | tile | 32x32 | none | seamless tileable pixel art texture of very dark mossy teal stone bricks, top-down
+floor_sanctum | tile | 32x32 | none | seamless tileable top-down pixel art dungeon floor texture of charred dark red stone slabs with faint glowing ember cracks, no objects
+wall_sanctum | tile | 32x32 | none | seamless tileable pixel art texture of black basalt bricks with thin glowing orange cracks, top-down
+title | bg | 480x270 | none | dark fantasy pixel art scene of a ruined gothic cathedral crypt entrance at night, a lone hooded wanderer with a glowing lantern standing before the gates, drifting embers, moody purple and amber lighting, wide cinematic composition

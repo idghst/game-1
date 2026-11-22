@@ -1,0 +1,67 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: 4.7.2
+
+jobs:
+  test-and-export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rust 도구 빌드·테스트
+        run: |
+          cargo build --release --manifest-path tools/forge/Cargo.toml
+          cargo test --release --manifest-path tools/forge/Cargo.toml
+
+      - name: Godot·내보내기 템플릿 캐시
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot
+            ~/.local/share/godot/export_templates
+          key: godot-${{ env.GODOT_VERSION }}
+
+      - name: Godot 설치
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot ~/.local/share/godot/export_templates
+          cd ~/godot
+          curl -sSLo godot.zip "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip && mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 godot && rm godot.zip
+          curl -sSLo t.tpz "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          unzip -q t.tpz && mv templates ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable && rm t.tpz
+
+      - name: GodotSteam 애드온 받기
+        run: tools/forge/target/release/forge steam-addon
+
+      - name: 테스트
+        env:
+          GODOT: /home/runner/godot/godot
+        run: tools/forge/target/release/forge test
+
+      - name: 3플랫폼 내보내기
+        env:
+          GODOT: /home/runner/godot/godot
+        run: tools/forge/target/release/forge build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HollowVigil-windows
+          path: build/windows
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HollowVigil-macos
+          path: build/macos
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HollowVigil-linux
+          path: build/linux

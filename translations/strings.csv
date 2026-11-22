@@ -1,0 +1,168 @@
+keys,en,ko
+GAME_TITLE,Hollow Vigil,할로우 비질
+FLOOR,Floor,층
+THEME_CRYPT,The Hollow Crypt,공허의 지하묘지
+THEME_CATACOMB,Drowned Catacombs,잠긴 납골당
+THEME_SANCTUM,Ember Sanctum,잿불 성소
+BOSS_WARDEN,The Bone Warden,뼈의 파수꾼
+BOSS_MATRON,The Drowned Matron,익사한 수녀원장
+BOSS_KING,The Ashen King,재의 왕
+NOT_ENOUGH_GOLD,Not enough gold,금화가 부족합니다
+CHOOSE_UPGRADE,Choose a blessing,축복을 고르세요
+SYNERGY,Synergy,시너지
+SYN_MIGHT,Warlord (+25% damage),전쟁군주 (피해 +25%)
+SYN_SWIFT,Tempest (kills reset dash),폭풍 (처치 시 대시 초기화)
+SYN_ARCANE,Arcanist (seeking piercing shots),비전술사 (유도·관통 탄)
+SYN_BLOOD,"Bloodbound (+2 max HP, lifesteal)","피의 맹약 (최대 체력 +2, 흡혈)"
+STAIRS_DOWN,Descend,내려가기
+HEART,Heart,하트
+ACTION_INTERACT,Interact,상호작용
+VICTORY,Victory,승리
+GAME_OVER,You have fallen,쓰러졌습니다
+KILLS,kills,처치
+RESTART,Try again,다시 도전
+RARITY_COMMON,Common,일반
+RARITY_RARE,Rare,희귀
+RARITY_EPIC,Epic,영웅
+RARITY_LEGENDARY,Legendary,전설
+UPG_SHARP,Sharpened Rounds,날 선 탄환
+UPG_SHARP_DESC,+3 damage,피해 +3
+UPG_HEAVY,Heavy Shot,무거운 탄
+UPG_HEAVY_DESC,"+6 damage, stronger knockback, slightly slower fire","피해 +6, 넉백 강화, 연사 약간 감소"
+UPG_TRIGGER,Quick Trigger,빠른 방아쇠
+UPG_TRIGGER_DESC,+15% fire rate,연사 +15%
+UPG_BOOTS,Swift Boots,날쌘 장화
+UPG_BOOTS_DESC,+12% move speed,이동 속도 +12%
+UPG_LIGHTSTEP,Light Step,가벼운 발걸음
+UPG_LIGHTSTEP_DESC,-25% dash cooldown,대시 대기 시간 -25%
+UPG_VITALITY,Vitality,생명력
+UPG_VITALITY_DESC,"+2 max HP, heal 2","최대 체력 +2, 체력 2 회복"
+UPG_BARREL,Long Barrel,긴 총열
+UPG_BARREL_DESC,"+20% shot speed, +25% range","탄속 +20%, 사거리 +25%"
+UPG_GREED,Greedy Palm,탐욕의 손
+UPG_GREED_DESC,+50% gold,금화 +50%
+UPG_TWIN,Twin Shot,쌍발
+UPG_TWIN_DESC,+1 projectile,탄 +1
+UPG_PIERCE,Piercing Rounds,관통탄
+UPG_PIERCE_DESC,Shots pierce one more enemy,탄이 적 하나를 더 관통
+UPG_RICOCHET,Ricochet,도탄
+UPG_RICOCHET_DESC,Shots bounce off walls once more,탄이 벽에서 한 번 더 튕김
+UPG_BLOODPACT,Blood Pact,피의 계약
+UPG_BLOODPACT_DESC,Heal 1 HP every 20 kills,20번 처치마다 체력 1 회복
+UPG_CRITICAL,Keen Eye,예리한 눈
+UPG_CRITICAL_DESC,+15% chance for double damage,15% 확률로 피해 2배
+UPG_FROST,Frost Rounds,서리 탄
+UPG_FROST_DESC,Hits slow enemies,맞은 적이 느려짐
+UPG_HOMING,Seeking Rounds,추적탄
+UPG_HOMING_DESC,Shots curve toward enemies,탄이 적을 향해 휘어짐
+UPG_EXPLOSIVE,Blast Rounds,폭발탄
+UPG_EXPLOSIVE_DESC,Shots explode on impact,탄이 맞으면 폭발
+UPG_PHANTOM,Phantom Dash,환영 대시
+UPG_PHANTOM_DESC,Dashing through enemies deals heavy damage,대시로 적을 통과하면 큰 피해
+UPG_INFERNO,Inferno,업화
+UPG_INFERNO_DESC,Hits set enemies on fire,맞은 적에게 불이 붙음
+UPG_GLASS,Glass Cannon,유리 대포
+UPG_GLASS_DESC,"+60% damage, -2 max HP","피해 +60%, 최대 체력 -2"
+UPG_TRIPLE,Triple Barrel,삼연장 총열
+UPG_TRIPLE_DESC,+2 projectiles,탄 +2
+UPG_SOULS,Soul Harvest,영혼 수확
+UPG_SOULS_DESC,Kills release seeking soul bolts,처치 시 추적하는 영혼탄 발사
+UPG_TIMEWARP,Time Warp,시간 왜곡
+UPG_TIMEWARP_DESC,"+30% fire rate, +15% move speed","연사 +30%, 이동 속도 +15%"
+FLOOR_N,Floor %d,%d층
+SETTINGS,Settings,설정
+BACK,Back,뒤로
+SET_AUDIO,Audio,소리
+SET_MASTER,Master,전체 음량
+SET_MUSIC,Music,배경음
+SET_SFX,Effects,효과음
+SET_DISPLAY,Display,화면
+SET_FULLSCREEN,Fullscreen,전체 화면
+SET_SCALE,Window scale,창 배율
+SET_GAMEPLAY,Gameplay,게임
+SET_SHAKE,Screen shake,화면 흔들림
+SET_LANGUAGE,Language,언어
+LANG_AUTO,Auto,자동
+SET_CONTROLS,Controls,조작
+SET_CONTROLS_HINT,Left: keyboard/mouse  Right: gamepad (sticks move and aim),왼쪽: 키보드·마우스  오른쪽: 게임패드(스틱은 이동·조준 고정)
+ACT_MOVE_UP,Move up,위로 이동
+ACT_MOVE_DOWN,Move down,아래로 이동
+ACT_MOVE_LEFT,Move left,왼쪽 이동
+ACT_MOVE_RIGHT,Move right,오른쪽 이동
+ACT_SHOOT,Shoot,사격
+ACT_DASH,Dash,대시
+ACT_PAUSE,Pause,일시정지
+SET_RESET_KEYS,Reset controls,조작 초기화
+SET_PRESS_KEY,Press a key...,키를 누르세요...
+SET_PRESS_BUTTON,Press a button...,버튼을 누르세요...
+NEW_RUN,Begin the Vigil,불침번 시작
+META_TITLE,Ember Altar,잿불 제단
+CREDITS,Credits,크레딧
+QUIT,Quit,종료
+EMBERS,Embers,잿불
+PAUSED,Paused,일시정지
+RESUME,Resume,계속하기
+ABANDON,Abandon run,포기하기
+TO_TITLE,Title screen,타이틀로
+RES_FLOOR,Floor reached,도달한 층
+RES_TIME,Time,시간
+RES_KILLS,Kills,처치
+RES_ELITES,Elites slain,엘리트 처치
+RES_BOSSES,Bosses slain,보스 처치
+RES_GOLD,Gold collected,모은 금화
+RES_HITS,Wounds taken,받은 피해
+RES_EMBERS,Embers earned,얻은 잿불
+ENDING_TEXT,"The Ashen King crumbles, and the last ember of his crown gutters out. For the first time in a hundred years, the bells beneath the cathedral fall silent. You climb back toward the dawn, lantern dimmed but unbroken. The vigil is kept.","재의 왕이 무너지고 왕관의 마지막 불씨가 꺼진다. 백 년 만에 처음으로 성당 아래의 종소리가 멎는다. 당신은 흐려졌지만 꺼지지 않은 등불을 들고 새벽을 향해 올라간다. 불침번은 지켜졌다."
+CREDITS_TEXT,"Hollow Vigil — design, code and art direction by idghst. Engine: Godot Engine (MIT). Steam integration: GodotSteam (MIT). Font: Galmuri by Lee Minseo (SIL OFL 1.1). Pixel art generated locally with FLUX 3 Image Klein and hand-processed to a shared palette. Sound effects and music synthesized in-house.","할로우 비질 — 기획·코드·아트 디렉션 idghst. 엔진: Godot Engine(MIT). Steam 연동: GodotSteam(MIT). 폰트: 갈무리, 이민서(SIL OFL 1.1). 픽셀아트는 FLUX 3 Image Klein으로 로컬 생성 후 공용 팔레트로 가공. 효과음·배경음은 직접 합성."
+META_MAXED,Max,최대
+META_VIGOR,Vigor,활력
+META_VIGOR_DESC,+1 max HP per rank,단계마다 최대 체력 +1
+META_MIGHT,Might,완력
+META_MIGHT_DESC,+2 base damage per rank,단계마다 기본 피해 +2
+META_HASTE,Haste,신속
+META_HASTE_DESC,+5% move speed per rank,단계마다 이동 속도 +5%
+META_TRIGGER,Steady Hand,안정된 손
+META_TRIGGER_DESC,+5% fire rate per rank,단계마다 연사 +5%
+META_REFLEX,Reflex,반사신경
+META_REFLEX_DESC,-10% dash cooldown per rank,단계마다 대시 대기 시간 -10%
+META_PURSE,Old Purse,낡은 지갑
+META_PURSE_DESC,Start each run with 15 gold per rank,단계마다 시작 금화 +15
+META_FORTUNE,Fortune,행운
+META_FORTUNE_DESC,Rarer blessings appear more often,희귀한 축복이 더 자주 등장
+META_SCAVENGER,Scavenger,청소부
+META_SCAVENGER_DESC,Heal 1 HP at the start of each floor,층을 시작할 때 체력 1 회복
+META_SECOND_WIND,Second Wind,재기
+META_SECOND_WIND_DESC,"Once per run, rise again with 2 HP",한 판에 한 번 체력 2로 되살아남
+META_INSIGHT,Insight,통찰
+META_INSIGHT_DESC,Choose from 4 blessings instead of 3,축복을 3개 대신 4개 중에서 고름
+REVIVED,Second Wind!,재기!
+ACHIEVEMENT_UNLOCKED,Achievement unlocked,업적 달성
+ACH_FIRST_BLOOD,First Blood,첫 피
+ACH_FIRST_BLOOD_DESC,Slay your first enemy,처음으로 적을 처치
+ACH_WARDEN,Bone Breaker,뼈 부수는 자
+ACH_WARDEN_DESC,Defeat the Bone Warden,뼈의 파수꾼 처치
+ACH_MATRON,Tide Breaker,물결을 가르는 자
+ACH_MATRON_DESC,Defeat the Drowned Matron,익사한 수녀원장 처치
+ACH_KING,Vigil Kept,지켜진 불침번
+ACH_KING_DESC,Defeat the Ashen King,재의 왕 처치
+ACH_UNTOUCHED,Untouched,무결
+ACH_UNTOUCHED_DESC,Clear a floor without taking damage,피해 없이 한 층 돌파
+ACH_SYNERGY,Harmony,조화
+ACH_SYNERGY_DESC,Activate a synergy,시너지 발동
+ACH_LEGENDARY,Relic Seeker,유물 사냥꾼
+ACH_LEGENDARY_DESC,Obtain a legendary blessing,전설 축복 획득
+ACH_HOARDER,Hoarder,수집가
+ACH_HOARDER_DESC,Hold 150 gold at once,금화 150개를 한 번에 보유
+ACH_SLAYER,Slayer,학살자
+ACH_SLAYER_DESC,Slay 1000 enemies in total,적을 총 1000마리 처치
+ACH_ELITE_HUNTER,Elite Hunter,엘리트 사냥꾼
+ACH_ELITE_HUNTER_DESC,Slay 50 elites in total,엘리트를 총 50마리 처치
+ACH_SWIFT_VIGIL,Swift Vigil,재빠른 불침번
+ACH_SWIFT_VIGIL_DESC,Win a run in under 18 minutes,18분 안에 승리
+ACH_DEVOTED,Devoted,헌신
+ACH_DEVOTED_DESC,Buy 5 ranks at the Ember Altar,잿불 제단에서 강화 5단계 구매
+ACH_DASHER,Restless,쉴 새 없이
+ACH_DASHER_DESC,Dash 500 times in total,총 500번 대시
+ACH_PERSISTENT,Persistent,끈기
+ACH_PERSISTENT_DESC,Begin 10 runs,10판 시작
+CONTINUE,Continue,계속

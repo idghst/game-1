@@ -1,0 +1,25 @@
+{
+  "content_filter": {
+    "model": "Falconsai/nsfw_image_detection",
+    "nsfw_score": 0.02045193687081337,
+    "threshold": 0.85
+  },
+  "generator": "맥미니 이미지 생성기",
+  "height": 512,
+  "local_only": true,
+  "model": "FLUX 3 Image Klein (mflux q8)",
+  "model_path": "/Volumes/Sandisk/Users/idghst/models/flux3-klein-q8",
+  "output_sha256": "7e5da9ab4e0606a716f358e07180da34e3575aeda4e0c749847c7f8160959f9c",
+  "runtime": "/Volumes/Sandisk/Users/idghst/qwen-image-venv312/bin/python3",
+  "seed": 80565520,
+  "steps": 16,
+  "versions": {
+    "mflux": "0.22.0",
+    "mlx": "0.32.4",
+    "pillow": "12.3.0",
+    "torch": "2.14.1",
+    "transformers": "5.20.0"
+  },
+  "wall_time_seconds": 31.3,
+  "width": 512
+}

@@ -1,0 +1,12 @@
+# graphify: 이미지·음원·폰트 같은 바이너리 에셋과 엔진 생성 파일은 그래프에서 뺀다
+assets/src/
+assets/sprites/
+assets/audio/
+assets/fonts/
+screenshots/
+store/screenshots/
+store/capsules/
+*.import
+*.uid
+*.translation
+assets/logo/

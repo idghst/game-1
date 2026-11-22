@@ -3,9 +3,20 @@ config_version=5
 
 [application]
 
-config/name="Dungeon Prototype"
-run/main_scene="res://main.tscn"
+config/name="Hollow Vigil"
+run/main_scene="res://title.tscn"
+config/version="0.9.0"
+config/icon="res://assets/logo/icon.svg"
 config/features=PackedStringArray("4.7", "GL Compatibility")
+
+[autoload]
+
+Fx="*res://scripts/autoload/fx.gd"
+Sfx="*res://scripts/autoload/audio.gd"
+SteamService="*res://scripts/autoload/steam_service.gd"
+Profile="*res://scripts/autoload/profile.gd"
+Achievements="*res://scripts/autoload/achievements.gd"
+Settings="*res://scripts/autoload/settings.gd"
 
 [display]
 
@@ -54,13 +65,58 @@ aim_down={
 "deadzone": 0.3,
 "events": [Object(InputEventJoypadMotion,"axis":3,"axis_value":1.0)]
 }
+dash={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":32), Object(InputEventKey,"physical_keycode":4194325), Object(InputEventJoypadButton,"button_index":9), Object(InputEventJoypadMotion,"axis":4,"axis_value":1.0)]
+}
+pause={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194305), Object(InputEventJoypadButton,"button_index":6)]
+}
+ui_accept={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"keycode":4194309), Object(InputEventKey,"keycode":4194310), Object(InputEventKey,"keycode":32), Object(InputEventJoypadButton,"button_index":0)]
+}
+ui_cancel={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"keycode":4194305), Object(InputEventJoypadButton,"button_index":1)]
+}
+ui_left={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"keycode":4194319), Object(InputEventJoypadButton,"button_index":13), Object(InputEventJoypadMotion,"axis":0,"axis_value":-1.0)]
+}
+ui_right={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"keycode":4194321), Object(InputEventJoypadButton,"button_index":14), Object(InputEventJoypadMotion,"axis":0,"axis_value":1.0)]
+}
+ui_up={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"keycode":4194320), Object(InputEventJoypadButton,"button_index":11), Object(InputEventJoypadMotion,"axis":1,"axis_value":-1.0)]
+}
+ui_down={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"keycode":4194322), Object(InputEventJoypadButton,"button_index":12), Object(InputEventJoypadMotion,"axis":1,"axis_value":1.0)]
+}
+interact={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":69), Object(InputEventJoypadButton,"button_index":2)]
+}
 shoot={
 "deadzone": 0.5,
 "events": [Object(InputEventMouseButton,"button_index":1), Object(InputEventJoypadMotion,"axis":5,"axis_value":1.0)]
 }
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://translations/strings.en.translation", "res://translations/strings.ko.translation")
+
+[steam]
+
+app_id=480
 
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/canvas_textures/default_texture_filter=0
+textures/vram_compression/import_etc2_astc=true

@@ -1,2 +1,6 @@
 .godot/
 graphify-out/
+tools/forge/target/
+addons/godotsteam/
+steam/out/
+build/
