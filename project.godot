@@ -17,6 +17,7 @@ SteamService="*res://scripts/autoload/steam_service.gd"
 Profile="*res://scripts/autoload/profile.gd"
 Achievements="*res://scripts/autoload/achievements.gd"
 Settings="*res://scripts/autoload/settings.gd"
+Smoke="*res://scripts/autoload/smoke.gd"
 
 [display]
 

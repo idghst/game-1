@@ -6,7 +6,7 @@ description = "Hollow Vigil 에셋·빌드 자동화 도구"
 publish = false
 
 [dependencies]
-image = { version = "0.25", default-features = false, features = ["png"] }
+image = { version = "0.25", default-features = false, features = ["png", "ico"] }
 sha2 = "0.10"
 ureq = "2"
 zip = { version = "2", default-features = false, features = ["deflate"] }

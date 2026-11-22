@@ -1,20 +1,35 @@
 name: build
 
+# 메인 플랫폼: Windows·macOS (필수 확인). Linux·Steam Deck은 부가 플랫폼이라 실패해도 전체를 막지 않는다.
+# 비용: 내보내기는 Linux 러너에서 한 번만 하고, Windows·macOS 러너는 받은 결과물을 실행만 한다.
 on:
   push:
     branches: [main]
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   GODOT_VERSION: 4.7.2
 
 jobs:
-  test-and-export:
+  export:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+
+      - name: Rust 빌드 캐시
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            tools/forge/target
+          key: cargo-${{ runner.os }}-${{ hashFiles('tools/forge/Cargo.lock') }}-${{ hashFiles('tools/forge/src/**') }}
+          restore-keys: cargo-${{ runner.os }}-${{ hashFiles('tools/forge/Cargo.lock') }}-
 
       - name: Rust 도구 빌드·테스트
         run: |
@@ -28,7 +43,7 @@ jobs:
           path: |
             ~/godot
             ~/.local/share/godot/export_templates
-          key: godot-${{ env.GODOT_VERSION }}
+          key: godot-linux-${{ env.GODOT_VERSION }}
 
       - name: Godot 설치
         if: steps.godot-cache.outputs.cache-hit != 'true'
@@ -43,25 +58,184 @@ jobs:
       - name: GodotSteam 애드온 받기
         run: tools/forge/target/release/forge steam-addon
 
-      - name: 테스트
+      - name: 테스트(밸런스 포함 전체)
         env:
           GODOT: /home/runner/godot/godot
         run: tools/forge/target/release/forge test
 
-      - name: 3플랫폼 내보내기
+      - name: Windows·macOS 내보내기
         env:
           GODOT: /home/runner/godot/godot
-        run: tools/forge/target/release/forge build
+        run: tools/forge/target/release/forge build windows,macos
+
+      - name: Linux 내보내기·스모크(부가 플랫폼)
+        continue-on-error: true
+        env:
+          GODOT: /home/runner/godot/godot
+        run: |
+          tools/forge/target/release/forge build linux
+          build/linux/HollowVigil.x86_64 --headless --fixed-fps 60 -- --smoke
 
       - uses: actions/upload-artifact@v4
         with:
           name: HollowVigil-windows
           path: build/windows
+          retention-days: 7
       - uses: actions/upload-artifact@v4
         with:
           name: HollowVigil-macos
-          path: build/macos
+          path: build/macos/HollowVigil.zip
+          retention-days: 7
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: HollowVigil-linux
           path: build/linux
+          if-no-files-found: ignore
+          retention-days: 7
+
+  windows:
+    needs: export
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: HollowVigil-windows
+          path: build/windows
+
+      - name: 배포 폴더·메타데이터·콘솔 없는 실행 파일 확인
+        run: |
+          $exe = "build/windows/HollowVigil.exe"
+          foreach ($f in @($exe, "build/windows/steam_api64.dll", "build/windows/libgodotsteam.windows.template_release.x86_64.dll")) {
+            if (-not (Test-Path $f)) { throw "배포 폴더에 없음: $f" }
+          }
+          Get-ChildItem build/windows | Format-Table Name, Length
+          $v = (Get-Item $exe).VersionInfo
+          $v | Format-List ProductName, FileDescription, CompanyName, LegalCopyright, FileVersion, ProductVersion
+          if ($v.ProductName -ne "Hollow Vigil" -or $v.CompanyName -ne "idghst" -or -not $v.LegalCopyright) { throw "실행 파일 메타데이터가 비어 있거나 다름" }
+          # PE 헤더의 Subsystem: 2 = GUI(콘솔 창 없음), 3 = 콘솔
+          $b = [IO.File]::ReadAllBytes((Resolve-Path $exe))
+          $pe = [BitConverter]::ToInt32($b, 0x3C)
+          $sub = [BitConverter]::ToUInt16($b, $pe + 0x5C)
+          "PE subsystem = $sub"
+          if ($sub -ne 2) { throw "릴리스 실행 파일이 GUI 서브시스템이 아님(콘솔 창이 뜸)" }
+          if (Test-Path "build/windows/HollowVigil.console.exe") { throw "릴리스 배포에 콘솔 래퍼가 들어 있음" }
+          Add-Type -AssemblyName System.Drawing
+          $icon = [System.Drawing.Icon]::ExtractAssociatedIcon((Resolve-Path $exe))
+          $icon.ToBitmap().Save("$PWD/exe_icon.png")
+          "아이콘 추출: $($icon.Width)x$($icon.Height)"
+
+      - name: 실행 스모크(헤드리스, 자동 플레이 한 판)
+        run: |
+          $p = Start-Process -FilePath build/windows/HollowVigil.exe -ArgumentList '--headless','--fixed-fps','60','--','--smoke' `
+                 -Wait -PassThru -RedirectStandardOutput smoke_out.txt -RedirectStandardError smoke_err.txt
+          Get-Content smoke_out.txt, smoke_err.txt
+          "종료 코드: $($p.ExitCode)"
+          # GUI 실행 파일이라 표준 출력이 비어 있을 수 있어 게임이 남긴 결과·로그 파일도 함께 본다
+          $ud = "$env:APPDATA/Godot/app_userdata/Hollow Vigil"
+          Get-Content "$ud/smoke_result.txt" -ErrorAction SilentlyContinue
+          $log = (Get-Content smoke_out.txt, smoke_err.txt, "$ud/smoke_result.txt", "$ud/logs/godot.log" -Raw -ErrorAction SilentlyContinue) -join "`n"
+          if ($p.ExitCode -ne 0 -or $log -notmatch 'RESULT: PASS' -or $log -match 'SCRIPT ERROR') { throw "스모크 실패" }
+
+      - name: 실행 스모크(실제 창, ANGLE/Direct3D 렌더러)
+        run: |
+          $p = Start-Process -FilePath build/windows/HollowVigil.exe -ArgumentList '--rendering-driver','opengl3_angle','--','--smoke-render' `
+                 -Wait -PassThru -RedirectStandardOutput render_out.txt -RedirectStandardError render_err.txt
+          Get-Content render_out.txt, render_err.txt
+          "종료 코드: $($p.ExitCode)"
+          # GUI 실행 파일이라 표준 출력이 비어 있을 수 있어 게임이 남긴 결과·로그 파일도 함께 본다
+          $ud = "$env:APPDATA/Godot/app_userdata/Hollow Vigil"
+          Get-Content "$ud/smoke_result.txt" -ErrorAction SilentlyContinue
+          $log = (Get-Content render_out.txt, render_err.txt, "$ud/smoke_result.txt", "$ud/logs/godot.log" -Raw -ErrorAction SilentlyContinue) -join "`n"
+          if ($p.ExitCode -ne 0 -or $log -notmatch 'RESULT: PASS' -or $log -match 'SCRIPT ERROR') { throw "렌더 스모크 실패" }
+
+      - name: 스모크 결과·스크린샷 모으기
+        if: always()
+        run: |
+          New-Item -ItemType Directory -Force smoke | Out-Null
+          $ud = "$env:APPDATA/Godot/app_userdata/Hollow Vigil"
+          Copy-Item "$ud/*.png", "$ud/smoke_result.txt", "$ud/logs/*.log" smoke -ErrorAction SilentlyContinue
+          Copy-Item exe_icon.png, *_out.txt, *_err.txt smoke -ErrorAction SilentlyContinue
+          Get-ChildItem smoke
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-windows
+          path: smoke
+          retention-days: 7
+
+      # 같은 테스트를 Windows 경로 규칙에서도(밸런스 측정은 Linux에서만)
+      - name: Godot(Windows) 캐시
+        id: godot-win
+        uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-windows-${{ env.GODOT_VERSION }}
+      - name: Godot(Windows) 설치
+        if: steps.godot-win.outputs.cache-hit != 'true'
+        run: |
+          New-Item -ItemType Directory -Force ~/godot | Out-Null
+          Invoke-WebRequest "https://github.com/godotengine/godot-builds/releases/download/$env:GODOT_VERSION-stable/Godot_v$env:GODOT_VERSION-stable_win64.exe.zip" -OutFile ~/godot/g.zip
+          Expand-Archive ~/godot/g.zip -DestinationPath ~/godot
+          Remove-Item ~/godot/g.zip
+      - name: Rust 빌드 캐시
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            tools/forge/target
+          key: cargo-${{ runner.os }}-${{ hashFiles('tools/forge/Cargo.lock') }}-${{ hashFiles('tools/forge/src/**') }}
+          restore-keys: cargo-${{ runner.os }}-${{ hashFiles('tools/forge/Cargo.lock') }}-
+      - name: forge test --quick (Windows)
+        run: |
+          cargo build --release --manifest-path tools/forge/Cargo.toml
+          $env:GODOT = (Resolve-Path "~/godot/Godot_v$env:GODOT_VERSION-stable_win64_console.exe").Path
+          tools/forge/target/release/forge.exe test --quick
+
+  macos:
+    needs: export
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: HollowVigil-macos
+          path: dist
+      - name: 앱 구성·유니버설 바이너리·서명 확인
+        run: |
+          ditto -x -k dist/HollowVigil.zip app
+          BIN="app/Hollow Vigil.app/Contents/MacOS/Hollow Vigil"
+          uname -m
+          lipo -archs "$BIN" | tee archs.txt
+          grep -q x86_64 archs.txt && grep -q arm64 archs.txt
+          ls "app/Hollow Vigil.app/Contents/Frameworks"
+          lipo -archs "app/Hollow Vigil.app/Contents/Frameworks/libgodotsteam.macos.template_release.universal.dylib"
+          codesign -dv "app/Hollow Vigil.app" 2>&1 | head -5
+          /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "app/Hollow Vigil.app/Contents/Info.plist"
+      - name: 실행 스모크(헤드리스, 자동 플레이 한 판)
+        run: |
+          "app/Hollow Vigil.app/Contents/MacOS/Hollow Vigil" --headless --fixed-fps 60 -- --smoke 2>&1 | tee smoke_out.txt
+          grep -q "RESULT: PASS" smoke_out.txt && ! grep -q "SCRIPT ERROR" smoke_out.txt
+      - name: 실행 스모크(실제 창)
+        run: |
+          "app/Hollow Vigil.app/Contents/MacOS/Hollow Vigil" -- --smoke-render 2>&1 | tee render_out.txt
+          grep -q "RESULT: PASS" render_out.txt && ! grep -q "SCRIPT ERROR" render_out.txt
+      - name: 스모크 결과·스크린샷 모으기
+        if: always()
+        run: |
+          mkdir -p smoke
+          UD="$HOME/Library/Application Support/Godot/app_userdata/Hollow Vigil"
+          cp "$UD"/*.png "$UD"/smoke_result.txt "$UD"/logs/*.log smoke/ 2>/dev/null || true
+          cp *_out.txt archs.txt smoke/ 2>/dev/null || true
+          ls smoke
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-macos
+          path: smoke
+          retention-days: 7

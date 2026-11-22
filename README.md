@@ -6,6 +6,16 @@
 - 적 7계열 + 엘리트, 보스 3종, 축복 22개(희귀도 4단계, 태그 3개 시너지), 방 5종(전투·보물·상점·관문·보스)
 - 잿불 제단 영구 강화 10종, 업적 14개, Steam Cloud, 한국어·영어, 키·패드 재설정
 
+## 지원 플랫폼
+
+| 구분 | 플랫폼 | 검증 |
+|---|---|---|
+| 메인 | Windows 10/11 x64 | CI `windows-latest`에서 배포 exe 실행: 헤드리스 자동 플레이 한 판, 실제 창(ANGLE/Direct3D) 렌더·정수 배율·전체 화면, 저장, GodotSteam DLL, 메타데이터·아이콘·GUI 서브시스템, `forge test --quick` |
+| 메인 | macOS 11+ (Apple Silicon·Intel 유니버설) | CI `macos-latest`(Apple Silicon)에서 배포 앱 실행: 같은 스모크, 유니버설 바이너리·ad-hoc 서명 확인 |
+| 부가 | Linux x64 / SteamOS(Steam Deck) | 빌드와 헤드리스 스모크는 돌지만 실패해도 CI를 막지 않음 |
+
+배포 빌드 스모크는 누구나 돌릴 수 있습니다: `HollowVigil.exe --headless --fixed-fps 60 -- --smoke`, 실제 창은 `-- --smoke-render`(결과: 사용자 데이터 폴더의 `smoke_result.txt`).
+
 ## 실행
 
 ```sh
@@ -23,8 +33,8 @@ godot --path .                               # 게임 실행
 
 | 명령 | 하는 일 |
 |---|---|
-| `forge test [--long]` | 헤드리스 자가검증 전체(던전 연결성, 번역, 저장 손상, 9층 흐름, 패드 전용 메뉴, 자동 플레이, 실력별 밸런스) |
-| `forge build` | Windows·macOS·Linux 내보내기 → `build/` |
+| `forge test [--long\|--quick]` | 헤드리스 자가검증 전체(던전 연결성, 번역, 저장 손상, 9층 흐름, 패드 전용 메뉴, 자동 플레이, 실력별 밸런스) |
+| `forge build [windows,macos,linux]` | 내보내기 → `build/`(생략하면 세 플랫폼) |
 | `forge steam-addon` | GodotSteam GDExtension 받기(체크섬 확인) |
 | `forge steam-vdf` / `forge steam-upload` | SteamPipe VDF 생성 / steamcmd 업로드 (`steam/README.md`) |
 | `forge gen` → `forge pixel` | 맥미니 이미지 생성기로 원본 생성 → 공용 팔레트 픽셀아트 변환 |

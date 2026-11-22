@@ -26,8 +26,12 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	for a in REBINDABLE:
 		_defaults[a] = {"kb": _slot_event(a, "kb"), "pad": _slot_event(a, "pad")}
-	if not FileAccess.file_exists(path) and SteamService.on_deck:
-		fullscreen = true  # Steam Deck 첫 실행은 전체 화면
+	if not FileAccess.file_exists(path):
+		fullscreen = SteamService.on_deck  # Steam Deck 첫 실행은 전체 화면
+		# 첫 실행: 화면(제목 표시줄 여유 포함)에 들어가는 가장 큰 정수 배율(설정 범위 1~4). 1366x768이면 2배, 1080p면 3배
+		if DisplayServer.get_name() != "headless":
+			var usable := DisplayServer.screen_get_usable_rect().size
+			scale = clampi(floori(minf(usable.x / 480.0, (usable.y - 40) / 270.0)), 1, 4)
 	load_settings()
 	apply()
 	_theme = UiTheme.build()
@@ -97,15 +101,25 @@ func apply() -> void:
 		if fullscreen:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 		else:
+			var was_fullscreen := DisplayServer.window_get_mode() != DisplayServer.WINDOW_MODE_WINDOWED
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
-			var size := Vector2i(480, 270) * scale
-			DisplayServer.window_set_size(size)
-			var screen := DisplayServer.screen_get_usable_rect()
-			DisplayServer.window_set_position(screen.position + (screen.size - size) / 2)
+			_place_window()
+			if was_fullscreen:
+				# macOS는 전체 화면 해제 애니메이션이 끝난 뒤 창 크기를 다시 정하므로 한 번 더 맞춘다
+				get_tree().create_timer(0.8, true, false, true).timeout.connect(_place_window)
 	for a in REBINDABLE:
 		for slot in ["kb", "pad"]:
 			_set_slot(a, slot, to_event(bindings.get(a, {}).get(slot, _defaults[a][slot])))
 	changed.emit()
+
+
+func _place_window() -> void:
+	if fullscreen:
+		return
+	var size := Vector2i(480, 270) * scale
+	DisplayServer.window_set_size(size)
+	var screen := DisplayServer.screen_get_usable_rect()
+	DisplayServer.window_set_position(screen.position + (screen.size - size) / 2)
 
 
 func rebind(action: String, slot: String, ev: InputEvent) -> void:
