@@ -62,10 +62,18 @@ dash={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"physical_keycode":32), Object(InputEventKey,"physical_keycode":4194325), Object(InputEventJoypadButton,"button_index":9), Object(InputEventJoypadMotion,"axis":4,"axis_value":1.0)]
 }
+interact={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":69), Object(InputEventJoypadButton,"button_index":2)]
+}
 shoot={
 "deadzone": 0.5,
 "events": [Object(InputEventMouseButton,"button_index":1), Object(InputEventJoypadMotion,"axis":5,"axis_value":1.0)]
 }
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://translations/strings.en.translation", "res://translations/strings.ko.translation")
 
 [rendering]
 

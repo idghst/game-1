@@ -36,3 +36,32 @@ static func farthest(cells: Array[Vector2i]) -> Vector2i:
 		if dist[c] > dist[best]:
 			best = c
 	return best
+
+
+# 방 종류: start, combat, treasure, shop, 그리고 마지막 방은 boss(보스 층) 또는 gate.
+# 보물·상점은 막다른 방을 우선 쓴다.
+static func assign_types(rng: RandomNumberGenerator, cells: Array[Vector2i], boss_floor: bool) -> Dictionary:
+	var types := {}
+	for c in cells:
+		types[c] = "combat"
+	types[Vector2i.ZERO] = "start"
+	var last := farthest(cells)
+	types[last] = "boss" if boss_floor else "gate"
+	var free: Array[Vector2i] = []
+	for c in cells:
+		if types[c] == "combat":
+			free.append(c)
+	free.shuffle()
+	free.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return _neighbors(cells, a) < _neighbors(cells, b))
+	for special in ["treasure", "shop"]:
+		if free.size() > 2:  # 전투 방은 최소 2개 남긴다
+			types[free.pop_front()] = special
+	return types
+
+
+static func _neighbors(cells: Array[Vector2i], c: Vector2i) -> int:
+	var n := 0
+	for d in DIRS:
+		if cells.has(c + d):
+			n += 1
+	return n

@@ -1,0 +1,71 @@
+keys,en,ko
+GAME_TITLE,Hollow Vigil,할로우 비질
+FLOOR,Floor,층
+THEME_CRYPT,The Hollow Crypt,공허의 지하묘지
+THEME_CATACOMB,Drowned Catacombs,잠긴 납골당
+THEME_SANCTUM,Ember Sanctum,잿불 성소
+BOSS_WARDEN,The Bone Warden,뼈의 파수꾼
+BOSS_MATRON,The Drowned Matron,익사한 수녀원장
+BOSS_KING,The Ashen King,재의 왕
+NOT_ENOUGH_GOLD,Not enough gold,금화가 부족합니다
+CHOOSE_UPGRADE,Choose a blessing,축복을 고르세요
+SYNERGY,Synergy,시너지
+SYN_MIGHT,Warlord (+25% damage),전쟁군주 (피해 +25%)
+SYN_SWIFT,Tempest (kills reset dash),폭풍 (처치 시 대시 초기화)
+SYN_ARCANE,Arcanist (seeking piercing shots),비전술사 (유도·관통 탄)
+SYN_BLOOD,Bloodbound (+2 max HP, lifesteal),피의 맹약 (최대 체력 +2, 흡혈)
+STAIRS_DOWN,Descend,내려가기
+HEART,Heart,하트
+ACTION_INTERACT,Interact,상호작용
+VICTORY,Victory,승리
+GAME_OVER,You have fallen,쓰러졌습니다
+KILLS,kills,처치
+RESTART,Try again,다시 도전
+RARITY_COMMON,Common,일반
+RARITY_RARE,Rare,희귀
+RARITY_EPIC,Epic,영웅
+RARITY_LEGENDARY,Legendary,전설
+UPG_SHARP,Sharpened Rounds,날 선 탄환
+UPG_SHARP_DESC,+3 damage,피해 +3
+UPG_HEAVY,Heavy Shot,무거운 탄
+UPG_HEAVY_DESC,"+6 damage, stronger knockback, slightly slower fire","피해 +6, 넉백 강화, 연사 약간 감소"
+UPG_TRIGGER,Quick Trigger,빠른 방아쇠
+UPG_TRIGGER_DESC,+15% fire rate,연사 +15%
+UPG_BOOTS,Swift Boots,날쌘 장화
+UPG_BOOTS_DESC,+12% move speed,이동 속도 +12%
+UPG_LIGHTSTEP,Light Step,가벼운 발걸음
+UPG_LIGHTSTEP_DESC,-25% dash cooldown,대시 대기 시간 -25%
+UPG_VITALITY,Vitality,생명력
+UPG_VITALITY_DESC,"+2 max HP, heal 2","최대 체력 +2, 체력 2 회복"
+UPG_BARREL,Long Barrel,긴 총열
+UPG_BARREL_DESC,"+20% shot speed, +25% range","탄속 +20%, 사거리 +25%"
+UPG_GREED,Greedy Palm,탐욕의 손
+UPG_GREED_DESC,+50% gold,금화 +50%
+UPG_TWIN,Twin Shot,쌍발
+UPG_TWIN_DESC,+1 projectile,탄 +1
+UPG_PIERCE,Piercing Rounds,관통탄
+UPG_PIERCE_DESC,Shots pierce one more enemy,탄이 적 하나를 더 관통
+UPG_RICOCHET,Ricochet,도탄
+UPG_RICOCHET_DESC,Shots bounce off walls once more,탄이 벽에서 한 번 더 튕김
+UPG_BLOODPACT,Blood Pact,피의 계약
+UPG_BLOODPACT_DESC,Heal 1 HP every 20 kills,20번 처치마다 체력 1 회복
+UPG_CRITICAL,Keen Eye,예리한 눈
+UPG_CRITICAL_DESC,+15% chance for double damage,15% 확률로 피해 2배
+UPG_FROST,Frost Rounds,서리 탄
+UPG_FROST_DESC,Hits slow enemies,맞은 적이 느려짐
+UPG_HOMING,Seeking Rounds,추적탄
+UPG_HOMING_DESC,Shots curve toward enemies,탄이 적을 향해 휘어짐
+UPG_EXPLOSIVE,Blast Rounds,폭발탄
+UPG_EXPLOSIVE_DESC,Shots explode on impact,탄이 맞으면 폭발
+UPG_PHANTOM,Phantom Dash,환영 대시
+UPG_PHANTOM_DESC,Dashing through enemies deals heavy damage,대시로 적을 통과하면 큰 피해
+UPG_INFERNO,Inferno,업화
+UPG_INFERNO_DESC,Hits set enemies on fire,맞은 적에게 불이 붙음
+UPG_GLASS,Glass Cannon,유리 대포
+UPG_GLASS_DESC,"+60% damage, -2 max HP","피해 +60%, 최대 체력 -2"
+UPG_TRIPLE,Triple Barrel,삼연장 총열
+UPG_TRIPLE_DESC,+2 projectiles,탄 +2
+UPG_SOULS,Soul Harvest,영혼 수확
+UPG_SOULS_DESC,Kills release seeking soul bolts,처치 시 추적하는 영혼탄 발사
+UPG_TIMEWARP,Time Warp,시간 왜곡
+UPG_TIMEWARP_DESC,"+30% fire rate, +15% move speed","연사 +30%, 이동 속도 +15%"
