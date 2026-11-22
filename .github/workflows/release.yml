@@ -76,8 +76,8 @@ jobs:
           security import "$RUNNER_TEMP/cert.p12" -k "$KC" -P "$MACOS_CERT_PASSWORD" -T /usr/bin/codesign
           rm "$RUNNER_TEMP/cert.p12"
           # 중간 인증서가 러너에 없어도 체인을 만들 수 있게
-          curl -fsSL https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer -o "$RUNNER_TEMP/g2.cer"
-          security import "$RUNNER_TEMP/g2.cer" -k "$KC" || true
+          curl -fsSL https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer -o "$RUNNER_TEMP/g2.cer" \
+            && security import "$RUNNER_TEMP/g2.cer" -k "$KC" || echo "중간 인증서 추가 건너뜀(러너 기본 인증서 사용)"
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KCPW" "$KC" > /dev/null
           ID=$(security find-identity -p codesigning "$KC" | grep -F "Developer ID Application" | grep -F "($APPLE_TEAM_ID)\"" | awk '{print $2}' | head -1)
           if [ -z "$ID" ]; then echo "::error::키체인에 팀 ID가 맞는 Developer ID Application 인증서가 없음"; exit 1; fi
