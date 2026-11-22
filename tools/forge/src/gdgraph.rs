@@ -556,6 +556,9 @@ if Path(spec).exists():
     sem_nodes, sem_edges, hyper, uncached = check_semantic_cache(docs, root=str(root), prompt_file=spec)
 if uncached:
     print('주의: 의미 추출 캐시가 없는 문서 %d개는 빠졌습니다(/graphify . --update로 추출): %s' % (len(uncached), ', '.join(Path(u).name for u in uncached)))
+# 의미 추출 결과는 출처를 표시해 둔다(source_location이 'L12' 꼴이어도 AST로 오인되지 않게)
+for x in sem_nodes + sem_edges:
+    x.setdefault('_origin', 'semantic')
 nodes, seen = [], set()
 for n in ast['nodes'] + gd['nodes'] + sem_nodes:
     if n['id'] not in seen:
