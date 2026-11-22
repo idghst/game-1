@@ -27,6 +27,7 @@ func _start() -> void:
 	paused = false
 	Engine.time_scale = 1.0
 	main = load("res://main.tscn").instantiate()
+	main.use_meta = false
 	root.add_child(main)
 	var bot := Bot.new()
 	bot.main = main
@@ -37,6 +38,7 @@ func _start() -> void:
 
 func _on_finished(victory: bool) -> void:
 	results.append({"hits": main.player.hits_taken, "victory": victory, "floor": main.floor_n, "time": main.stats.time, "kills": main.stats.kills, "upgrades": main.owned.size()})
+	print("  objects %d, nodes %d, orphan nodes %d, static mem %.1f MB" % [Performance.get_monitor(Performance.OBJECT_COUNT), Performance.get_monitor(Performance.OBJECT_NODE_COUNT), Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT), OS.get_static_memory_usage() / 1048576.0])
 	print("run %d: %s floor %d, %.1f min, %d kills, %d upgrades, %d hits taken, %dg spent" % [results.size(), "WIN" if victory else "LOSS", main.floor_n, main.stats.time / 60.0, main.stats.kills, main.owned.size(), main.player.hits_taken, main.stats.gold - main.gold])
 
 

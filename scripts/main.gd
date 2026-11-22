@@ -12,6 +12,8 @@ const Pickup = preload("res://scripts/pickup.gd")
 const Bullet = preload("res://scripts/bullet.gd")
 const Upgrades = preload("res://scripts/upgrades.gd")
 const Art = preload("res://scripts/art.gd")
+const PauseMenu = preload("res://scripts/ui/pause_menu.gd")
+const Results = preload("res://scripts/ui/results.gd")
 
 const W := 480.0
 const H := 270.0
@@ -55,6 +57,7 @@ var boss: Node2D
 var camera := Camera2D.new()
 var darkness := CanvasModulate.new()
 var over := false
+var use_meta := true  # false면 메타 강화 없이 시작하고 기록도 남기지 않는다(테스트·밸런스 측정용)
 
 # 통계(결과 화면·메타 재화·업적에 쓴다)
 var stats := {"kills": 0, "elites": 0, "bosses": 0, "gold": 0, "time": 0.0, "damage_taken": 0, "rooms": 0, "floor": 1}
@@ -506,6 +509,27 @@ func _physics_process(_delta: float) -> void:
 		_enter(current + d, d)
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("pause") and not over and not _menu_open:
+		get_viewport().set_input_as_handled()
+		open_pause()
+
+
+func open_pause() -> void:
+	if _menu_open or over:
+		return
+	_menu_open = true
+	get_tree().paused = true
+	var m := PauseMenu.new()
+	ui.add_child(m)
+	m.resumed.connect(func() -> void:
+		_menu_open = false
+		get_tree().paused = false)
+	m.abandoned.connect(func() -> void:
+		_menu_open = false
+		_finish(false))
+
+
 func _on_hp_changed() -> void:
 	hud.queue_redraw()
 
@@ -522,10 +546,14 @@ func _finish(victory: bool) -> void:
 	Sfx.music("")
 	if victory:
 		Sfx.play("victory")
+	var embers := Profile.record_run(stats, victory, player.dash_count) if use_meta else 0
 	run_finished.emit(victory)
-	var title := tr("VICTORY") if victory else tr("GAME_OVER")
-	_menu("%s\n%s %d  %s  %d %s" % [title, tr("FLOOR"), floor_n, _clock(stats.time), stats.kills, tr("KILLS")],
-		[{"text": tr("RESTART")}], func(_i: int) -> void: get_tree().reload_current_scene())
+	# 쓰러지는 연출을 잠깐 보여 준 뒤 결과 화면
+	await get_tree().create_timer(2.0 if victory else 1.2, true, false, true).timeout
+	if not is_inside_tree():
+		return
+	get_tree().paused = true
+	ui.add_child(Results.new().setup(stats, victory, embers, owned, []))
 
 
 # 제목 + 버튼 목록을 띄우고 게임을 멈춘다. 버튼을 누르면 메뉴를 닫고 on_pick(인덱스)를 부른다.

@@ -29,6 +29,7 @@ func _new_main() -> void:
 		main.queue_free()
 	paused = false
 	main = MainScene.instantiate()
+	main.use_meta = false
 	main.run_finished.connect(func(v: bool) -> void: victory = int(v))
 	root.add_child(main)
 
@@ -116,7 +117,14 @@ func _process(_delta: float) -> bool:
 			wait = 2
 		"death":
 			main.player.hit(99)
-			check(main.over and victory == 0 and paused, "death ends run with game over menu")
+			check(main.over and victory == 0, "death ends run")
+			step = "results"
+			wait = 90
+		"results":
+			if not paused and frames < 19000:
+				return false  # 결과 화면은 쓰러지는 연출(1.2초) 뒤에 뜬다
+			var n: int = main.ui.find_children("*", "Button", true, false).size()
+			check(paused and n == 2, "results screen with 2 buttons after death (paused=%s buttons=%d)" % [paused, n])
 			print("flow self-test: %d failures" % fails)
 			quit(1 if fails else 0)
 			return true
