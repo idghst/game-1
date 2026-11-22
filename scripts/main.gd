@@ -167,7 +167,7 @@ func _new_floor() -> void:
 		player.heal(1)
 	darkness.color = theme_data().ambient
 	_enter(Vector2i.ZERO, Vector2i.ZERO)
-	toast("%s %d\n%s" % [tr("FLOOR"), floor_n, tr(theme_data().name)], 2.5)
+	toast("%s\n%s" % [tr("FLOOR_N") % floor_n, tr(theme_data().name)], 2.5)
 
 
 # moved: 이전 방에서 이동한 방향. ZERO면 층 시작(중앙 배치).
@@ -494,7 +494,7 @@ func _process(delta: float) -> void:
 				prompt_label.text += "\n" + tr("UPG_" + target.item.to_upper() + "_DESC")
 		if Input.is_action_just_pressed("interact"):
 			_on_pickup_taken(target)
-	info_label.text = "%dg   %s %d   %s" % [gold, tr("FLOOR"), floor_n, _clock(stats.time)]
+	info_label.text = "%dg   %s   %s" % [gold, tr("FLOOR_N") % floor_n, _clock(stats.time)]
 
 
 func _clock(t: float) -> String:

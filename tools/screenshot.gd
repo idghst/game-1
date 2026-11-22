@@ -28,6 +28,10 @@ func _next() -> void:
 		return
 	var spec: String = shots.pop_front()
 	shot_name = spec.replace(":", "_")
+	# "en/title"처럼 앞에 언어를 붙이면 그 언어로 찍는다
+	TranslationServer.set_locale(spec.get_slice("/", 0) if "/" in spec else OS.get_locale_language())
+	spec = spec.get_slice("/", 1) if "/" in spec else spec
+	shot_name = shot_name.replace("/", "_")
 	var parts := spec.split(":")
 	t = 0.0
 	if parts[0] in ["title", "settings", "meta"]:
