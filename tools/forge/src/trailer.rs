@@ -17,10 +17,17 @@ const SCENES: [(&str, &str, &str, &[Cut]); 7] = [
     ("03_blessing", "22가지 축복으로 매번 다른 빌드", "22 blessings, a new build each run", &[("bless", "menu", -1.4, 3.9), ("bless", "fight", 0.2, 2.1)]),
     ("04_deeper", "깊어질수록 거세지는 어둠", "The deeper, the darker", &[("shop", "", 0.3, 2.7), ("elite", "", 0.6, 3.0), ("treasure", "", 0.0, 2.3)]),
     ("05_wardens", "세 층마다 기다리는 문지기", "A warden waits every third floor", &[("boss3", "", 1.0, 3.4), ("boss6", "", 1.0, 3.3), ("boss9", "", 1.0, 3.3)]),
-    ("06_embers", "쓰러져도 잿불은 남는다", "Fall, and the embers remain", &[("death", "death", -0.6, 2.6), ("altar", "", 0.4, 2.4)]),
+    ("06_embers", "쓰러져도 잿불은 남는다", "Fall, and the embers remain", &[("death", "death", -0.6, 3.0), ("altar", "", 0.4, 2.0)]),
     ("07_logo", "Hollow Vigil · 출시 예정", "Hollow Vigil · Coming soon", &[("logo", "", 0.3, 4.0)]),
 ];
 const FADE: f64 = 0.25;
+/// 화면을 메뉴 패널이 거의 다 덮는 클립: 자막이 글자와 겹치므로 장면 자막은 그 컷 앞에서 끝낸다
+const NO_CAPTION: [&str; 1] = ["altar"];
+
+/// 장면 시작부터 자막이 덮는 길이
+fn caption_len(cuts: &[Cut]) -> f64 {
+    cuts.iter().take_while(|c| !NO_CAPTION.contains(&c.0)).map(|c| c.3).sum()
+}
 
 fn run(cmd: &mut Command) -> bool {
     cmd.status().map(|s| s.success()).unwrap_or(false)
@@ -84,7 +91,7 @@ pub fn run_all(root: &Path, fresh: bool) {
         let mut t = 0.0;
         for s in &SCENES {
             let d: f64 = s.3.iter().map(|c| c.3).sum();
-            let ok = run(Command::new("ffmpeg").args(["-loglevel", "error", "-y", "-ss", &format!("{:.2}", t + d * 0.55), "-i"]).arg(&file)
+            let ok = run(Command::new("ffmpeg").args(["-loglevel", "error", "-y", "-ss", &format!("{:.2}", t + (d * 0.55).min(caption_len(s.3) - 0.5)), "-i"]).arg(&file)
                 .args(["-frames:v", "1"]).arg(stills.join(format!("{}.png", s.0))));
             if !ok {
                 fail("스틸 추출 실패");
@@ -102,7 +109,7 @@ fn edit(root: &Path, clips: &Path, caps: &Path, file: &Path) {
     let mut t = 0.0;
     let mut cap_at = vec![];
     for (si, s) in SCENES.iter().enumerate() {
-        cap_at.push((t, t + s.3.iter().map(|c| c.3).sum::<f64>()));
+        cap_at.push((t, t + caption_len(s.3)));
         for (ci, &(clip, cue, off, dur)) in s.3.iter().enumerate() {
             let dir = clips.join(clip);
             let c = cues(&dir);
