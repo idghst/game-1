@@ -87,6 +87,7 @@ godot --path .                               # 게임 실행
 | `forge gen` → `forge pixel` | 맥미니 이미지 생성기로 원본 생성 → 공용 팔레트 픽셀아트 변환 |
 | `forge sfx` | 효과음·배경음 합성 |
 | `forge capsules` | 스토어 캡슐 이미지 |
+| `forge trailer [--fresh]` | 45초 트레일러(`store/trailer/HollowVigil-trailer-{ko,en}.mp4`, 스틸 `store/trailer/stills/`)를 실제 게임 화면으로 촬영·편집. 창과 ffmpeg가 필요. 영상은 git에 넣지 않으니 이 명령으로 다시 만든다. 찍은 클립은 `build/trailer/`에 남아 재사용되고, `tools/trailer.gd`를 고쳤으면 `--fresh` |
 | `forge graph` | GDScript(.gd·.tscn·project.godot)를 직접 읽어 graphify 그래프에 합치고 Obsidian·HTML로 내보내기(주석은 읽지 않음) |
 
 창이 필요한 확인: `godot --path . -s tests/test_perf.gd`(프레임 속도), `godot --path . -s tools/screenshot.gd -- <폴더> [장면...]`(스크린샷).

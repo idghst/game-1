@@ -4,3 +4,5 @@ tools/forge/target/
 addons/godotsteam/
 steam/out/
 build/
+# 트레일러 영상은 수십 MB라 넣지 않는다: forge trailer로 다시 만든다
+store/trailer/*.mp4
