@@ -3,6 +3,8 @@ name: release
 # v* 태그(예: v0.9.0)를 푸시하면 build.yml 전체(테스트·내보내기·Windows/macOS 실기 스모크·설치 파일 검증)를 돌린 뒤
 # Windows 설치 파일, Windows 무설치 zip, macOS zip과 SHA-256 체크섬을 GitHub Release로 올린다.
 # 태그 이름은 project.godot의 config/version과 같아야 한다.
+# macOS: 시크릿 6개(README "macOS 서명·공증")가 모두 있으면 Developer ID 서명 → Apple 공증 → 스테이플한 zip을 올리고,
+# 하나도 없으면 ad-hoc 서명 zip을 "서명·공증 안 됨"으로 표시해 올린다. 일부만 있으면 설정 실수로 보고 실패한다.
 on:
   push:
     tags: ['v*']
@@ -14,9 +16,140 @@ jobs:
   build:
     uses: ./.github/workflows/build.yml
 
-  release:
-    needs: build
+  sign-check:
     runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - id: check
+        env:
+          MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+          APPLE_API_KEY_P8_BASE64: ${{ secrets.APPLE_API_KEY_P8_BASE64 }}
+        run: |
+          missing=""
+          for n in MACOS_CERT_P12_BASE64 MACOS_CERT_PASSWORD APPLE_TEAM_ID APPLE_API_KEY_ID APPLE_API_ISSUER_ID APPLE_API_KEY_P8_BASE64; do
+            [ -n "${!n}" ] || missing="$missing $n"
+          done
+          if [ -z "$missing" ]; then
+            echo "macOS 서명·공증: 시크릿 6개 확인"
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          elif [ "$(echo $missing | wc -w)" -eq 6 ]; then
+            echo "::warning::macOS 서명·공증 안 됨: 시크릿이 없어 ad-hoc 서명 zip을 올립니다"
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::macOS 서명·공증 시크릿 일부만 있음. 빠진 것:$missing"
+            exit 1
+          fi
+
+  macos-sign:
+    needs: [build, sign-check]
+    if: needs.sign-check.outputs.enabled == 'true'
+    runs-on: macos-latest
+    timeout-minutes: 60
+    env:
+      APP: dist/app/Hollow Vigil.app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: HollowVigil-macos
+          path: dist
+
+      - name: 임시 키체인에 Developer ID 인증서 넣기
+        env:
+          MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          KC="$RUNNER_TEMP/sign.keychain-db"
+          echo "KC=$KC" >> "$GITHUB_ENV"
+          KCPW=$(openssl rand -hex 24)
+          echo "::add-mask::$KCPW"
+          security create-keychain -p "$KCPW" "$KC"
+          security set-keychain-settings -lut 3600 "$KC"
+          security unlock-keychain -p "$KCPW" "$KC"
+          printf '%s' "$MACOS_CERT_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KC" -P "$MACOS_CERT_PASSWORD" -T /usr/bin/codesign
+          rm "$RUNNER_TEMP/cert.p12"
+          # 중간 인증서가 러너에 없어도 체인을 만들 수 있게
+          curl -fsSL https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer -o "$RUNNER_TEMP/g2.cer" \
+            && security import "$RUNNER_TEMP/g2.cer" -k "$KC" || echo "중간 인증서 추가 건너뜀(러너 기본 인증서 사용)"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KCPW" "$KC" > /dev/null
+          ID=$(security find-identity -p codesigning "$KC" | grep -F "Developer ID Application" | grep -F "($APPLE_TEAM_ID)\"" | awk '{print $2}' | head -1)
+          if [ -z "$ID" ]; then echo "::error::키체인에 팀 ID가 맞는 Developer ID Application 인증서가 없음"; exit 1; fi
+          echo "IDENTITY=$ID" >> "$GITHUB_ENV"
+
+      - name: 안쪽부터 서명(hardened runtime·타임스탬프)
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          ditto -x -k dist/HollowVigil.zip dist/app
+          SIGN=(codesign --force --timestamp --options runtime --keychain "$KC" --sign "$IDENTITY")
+          # 번들 안의 모든 Mach-O(GodotSteam·libsteam_api dylib 등)를 먼저, 본 실행 파일은 마지막에 번들과 함께
+          while IFS= read -r -d '' f; do
+            if file -b "$f" | grep -q Mach-O; then "${SIGN[@]}" "$f"; fi
+          done < <(find "$APP/Contents" -type f ! -path "$APP/Contents/MacOS/*" -print0)
+          "${SIGN[@]}" --entitlements installer/macos.entitlements "$APP"
+          codesign --verify --deep --strict --verbose=2 "$APP"
+          codesign -dvv "$APP" 2>&1 | grep -E "^(Authority|TeamIdentifier|Timestamp|CodeDirectory)"
+          codesign -d --entitlements - "$APP"
+          codesign -dv "$APP" 2>&1 | grep -qx "TeamIdentifier=$APPLE_TEAM_ID"
+
+      - name: Apple 공증(notarytool) → 스테이플 → 검증
+        env:
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+          APPLE_API_KEY_P8_BASE64: ${{ secrets.APPLE_API_KEY_P8_BASE64 }}
+        run: |
+          KEY="$RUNNER_TEMP/AuthKey.p8"
+          printf '%s' "$APPLE_API_KEY_P8_BASE64" | base64 --decode > "$KEY"
+          AUTH=(--key "$KEY" --key-id "$APPLE_API_KEY_ID" --issuer "$APPLE_API_ISSUER_ID")
+          ditto -c -k --keepParent "$APP" "$RUNNER_TEMP/notarize.zip"
+          xcrun notarytool submit "$RUNNER_TEMP/notarize.zip" "${AUTH[@]}" --wait --timeout 45m --output-format json > submit.json || true
+          cat submit.json; echo
+          ID=$(plutil -extract id raw -o - submit.json 2>/dev/null || true)
+          STATUS=$(plutil -extract status raw -o - submit.json 2>/dev/null || true)
+          if [ "$STATUS" != "Accepted" ]; then
+            echo "::error::공증 실패(status=${STATUS:-응답 없음})"
+            if [ -n "$ID" ]; then xcrun notarytool log "$ID" "${AUTH[@]}"; fi
+            exit 1
+          fi
+          xcrun stapler staple "$APP"
+          xcrun stapler validate "$APP"
+          codesign --verify --deep --strict --verbose=2 "$APP"
+          spctl -a -vv -t exec "$APP" 2>&1 | tee spctl.txt
+          grep -q "source=Notarized Developer ID" spctl.txt
+
+      - name: 서명된 앱 실행 스모크(헤드리스)
+        run: |
+          "$APP/Contents/MacOS/Hollow Vigil" --headless --fixed-fps 60 -- --smoke 2>&1 | tee smoke_out.txt
+          grep -q "RESULT: PASS" smoke_out.txt && ! grep -q "SCRIPT ERROR" smoke_out.txt
+
+      - name: 스테이플된 앱 다시 묶기
+        run: (cd dist/app && ditto -c -k --keepParent "Hollow Vigil.app" "$GITHUB_WORKSPACE/HollowVigil.zip")
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HollowVigil-macos-signed
+          path: HollowVigil.zip
+          retention-days: 7
+
+      - name: 키체인·키 파일 지우기
+        if: always()
+        run: |
+          security delete-keychain "$KC" 2>/dev/null || true
+          rm -f "$RUNNER_TEMP/cert.p12" "$RUNNER_TEMP/AuthKey.p8"
+
+  release:
+    needs: [build, sign-check, macos-sign]
+    # macos-sign은 시크릿이 없으면 건너뛰므로(skipped) 그때도 릴리스는 진행한다
+    if: ${{ !cancelled() && needs.build.result == 'success' && needs.sign-check.result == 'success' && (needs.macos-sign.result == 'success' || needs.macos-sign.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    env:
+      SIGNED: ${{ needs.macos-sign.result == 'success' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -32,7 +165,7 @@ jobs:
           path: win
       - uses: actions/download-artifact@v4
         with:
-          name: HollowVigil-macos
+          name: ${{ needs.macos-sign.result == 'success' && 'HollowVigil-macos-signed' || 'HollowVigil-macos' }}
           path: mac
       - uses: actions/download-artifact@v4
         with:
@@ -46,7 +179,10 @@ jobs:
           (cd win && zip -qr "../dist/HollowVigil-$VER-windows.zip" .)
           cp mac/HollowVigil.zip "dist/HollowVigil-$VER-macos.zip"
           (cd dist && sha256sum * > SHA256SUMS.txt && cat SHA256SUMS.txt)
-          sed "s/{{VERSION}}/$VER/g" .github/release-notes.md > notes.md
+          if [ "$SIGNED" = true ]; then KEEP=SIGNED DROP=UNSIGNED; echo "macOS: Developer ID 서명·Apple 공증된 zip"
+          else KEEP=UNSIGNED DROP=SIGNED; echo "::warning::macOS: 서명·공증 안 됨(ad-hoc 서명 zip)"; fi
+          sed -e "s/{{VERSION}}/$VER/g" -e "/{{$DROP}}/d" -e "s/{{$KEEP}}//" .github/release-notes.md > notes.md
+          cat notes.md
 
       - name: GitHub Release 만들기
         env:
