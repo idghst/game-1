@@ -22,7 +22,7 @@
 - [ ] 업적 14개 등록(API 이름은 `steam/README.md` 표 그대로), 아이콘 업로드(달성 `<id>.png`·미달성 `<id>_locked.png`, `store/achievements/256/` 권장)
 - [ ] Steam Cloud 켜기(쿼터 1MB, 파일 4개 정도)
 - [ ] 스토어 페이지 입력, 캡슐·스크린샷 업로드, 가격·출시일, 연령 등급 설문(IARC)
-- [ ] 트레일러 영상(선택이지만 강력 권장, 아직 없음)
+- [ ] 트레일러 업로드: `forge trailer`로 만든 `store/trailer/HollowVigil-trailer-{ko,en}.mp4`(45초, 1920x1080 60fps, H.264+AAC). Steam 권장(최대 1920x1080, 30·60fps, 5,000kbps 이상, H.264+AAC, .mp4) 충족
 - [ ] (부가) Steam Deck 호환성 검토 요청 — Linux를 출시 범위에 넣을 때만
 - [x] macOS Developer ID 서명·공증·스테이플 단계 — `release.yml`의 `macos-sign`(시크릿 없으면 건너뛰고 ad-hoc zip을 "서명·공증 안 됨"으로 표시)
 - [ ] **macOS 서명·공증 시크릿 넣기(주인이 할 일)**: Apple Developer Program 가입 → Developer ID Application 인증서(.p12)·App Store Connect API 키(.p8) 만들기 →

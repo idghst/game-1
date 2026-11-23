@@ -8,6 +8,7 @@
 //! - `forge build [windows,macos,linux]` : 내보내기(build/). 생략하면 세 플랫폼 모두.
 //! - `forge steam-vdf` / `forge steam-upload` : SteamPipe VDF 생성 / steamcmd 업로드.
 //! - `forge capsules` : Steam 스토어 캡슐 이미지(store/capsules/)를 키 아트+로고로 만든다.
+//! - `forge trailer [--fresh]` : 45초 트레일러(store/trailer/*.mp4)를 실제 게임 화면으로 찍고 편집한다(ffmpeg 필요).
 //! - `forge graph` : GDScript를 직접 읽어 graphify 그래프에 합치고 Obsidian·HTML로 내보낸다.
 
 mod audio;
@@ -15,6 +16,7 @@ mod gdgraph;
 mod pixel;
 mod release;
 mod store;
+mod trailer;
 
 use std::path::{Path, PathBuf};
 use std::process::{exit, Command};
@@ -120,9 +122,10 @@ fn main() {
         Some("steam-upload") => release::steam_upload(&root),
         Some("capsules") => store::run(&root),
         Some("graph") => gdgraph::run(&root),
+        Some("trailer") => trailer::run_all(&root, args.iter().any(|a| a == "--fresh")),
         Some("sheet") => pixel::sheet(&root, &manifest(&root), Path::new(args.get(1).map(String::as_str).unwrap_or("sheet.png"))),
         _ => {
-            eprintln!("사용법: forge <gen [이름] | pixel | sheet <out.png> | sfx | steam-addon | test [--long|--quick] | build [플랫폼,...] | steam-vdf | steam-upload | capsules | graph>");
+            eprintln!("사용법: forge <gen [이름] | pixel | sheet <out.png> | sfx | steam-addon | test [--long|--quick] | build [플랫폼,...] | steam-vdf | steam-upload | capsules | graph | trailer [--fresh]>");
             exit(2);
         }
     }
