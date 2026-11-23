@@ -11,6 +11,7 @@
 - [x] 스크린샷 8장(1920x1080, 실제 플레이) — `store/screenshots/` (Steam 최소 5장)
 - [x] 짧은 설명·상세 설명·특징(한/영) — `store/STORE_PAGE.md`
 - [x] 업적 14개 API 이름·조건 — `steam/README.md`
+- [x] 업적 아이콘 14개 × 달성/미달성 — `store/achievements/`(64x64), `store/achievements/256/`(256x256, Steamworks 권장), 목록·조건 `store/achievements/README.md`
 - [x] SteamPipe VDF 생성·업로드 스크립트 — `forge steam-vdf`, `forge steam-upload`
 - [x] 크레딧·라이선스 — `CREDITS.md`, `assets/fonts/OFL.txt`
 
@@ -18,7 +19,7 @@
 - [ ] Steamworks 파트너 가입, 앱 비용(Steam Direct) 결제, 세금·은행 정보
 - [ ] App ID 발급 → `project.godot`의 `[steam] app_id` 한 줄 교체(현재 테스트용 480)
 - [ ] Depot 만들고 `STEAM_DEPOT_*` 환경 변수로 업로드: Windows·macOS 필수, Linux는 출시 범위에 넣을지 결정 후
-- [ ] 업적 14개 등록(API 이름은 `steam/README.md` 표 그대로), 아이콘 업로드(달성/미달성 각 64x64 — 아직 없음)
+- [ ] 업적 14개 등록(API 이름은 `steam/README.md` 표 그대로), 아이콘 업로드(달성 `<id>.png`·미달성 `<id>_locked.png`, `store/achievements/256/` 권장)
 - [ ] Steam Cloud 켜기(쿼터 1MB, 파일 4개 정도)
 - [ ] 스토어 페이지 입력, 캡슐·스크린샷 업로드, 가격·출시일, 연령 등급 설문(IARC)
 - [ ] 트레일러 영상(선택이지만 강력 권장, 아직 없음)

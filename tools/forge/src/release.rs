@@ -97,6 +97,7 @@ pub fn test(root: &Path, long: bool, quick: bool) {
         vec!["tests/test_dungeon.gd"],
         vec!["tests/test_i18n.gd"],
         vec!["tests/test_save.gd"],
+        vec!["tests/test_achievement_icons.gd"],
         vec!["tests/test_flow.gd"],
         vec!["tests/test_gamepad.gd"],
         vec!["tests/test_autoplay.gd", "--", n],
